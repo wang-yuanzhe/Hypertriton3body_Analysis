@@ -90,7 +90,7 @@ def fitInvMass(df, title, massbin = [2.96, 3.04], nbins = 40, sigpdf = "Gauss", 
     if not(bkgpdf in ("none", "pol1", "pol2", "exp", "Argus", "doubleBkg")):
         raise Exception("Undefined bkgpdf!")
 
-    if not para:
+    if para == None:
         x = ROOT.RooRealVar("x", "x", massbin[0], massbin[-1])
     else:
         x = para[-1]
@@ -99,7 +99,7 @@ def fitInvMass(df, title, massbin = [2.96, 3.04], nbins = 40, sigpdf = "Gauss", 
     if len(df)==0:
         n_signal = ROOT.RooRealVar('N_{signal}', 'Nsignal', 0, 0)
         n_bkg = ROOT.RooRealVar('N_{bkg}', 'Nbackground', 0, 0)
-        para = False
+        para = None
         bkgcount = 0
         xframe = x.frame(ROOT.RooFit.Title(title), ROOT.RooFit.Name("dataframe"))
         return (xframe, n_signal, bkgcount, para)
@@ -122,7 +122,7 @@ def fitInvMass(df, title, massbin = [2.96, 3.04], nbins = 40, sigpdf = "Gauss", 
         n1 = ROOT.RooRealVar("n_{1}", "n1", 0.1, 10)
         a2 = ROOT.RooRealVar("a_{2}", "a2", 0.1, 2)
         n2 = ROOT.RooRealVar("n_{2}", "n2", 0.1, 10)
-        if para:
+        if para != None:
             sigma.setVal(para[1].getVal())
             a1.setVal(para[2].getVal())
             n1.setVal(para[3].getVal())
@@ -135,12 +135,12 @@ def fitInvMass(df, title, massbin = [2.96, 3.04], nbins = 40, sigpdf = "Gauss", 
             n2.setConstant(ROOT.kTRUE)
         fit_signal = ROOT.RooCrystalBall("fit_signal", "fit_signal", x, mu, sigma, a1, n1, a2, n2)
     elif sigpdf=="Gauss":
-        if para:
+        if para != None:
             sigma.setVal(para[1].getVal())
             sigma.setConstant(ROOT.kTRUE)
         fit_signal = ROOT.RooGaussian("fit_signal", "fit_signal", x, mu, sigma)
     elif sigpdf=="KDE":
-        if para:
+        if para != None:
             fit_signal = para[0].Clone("fit_signal")
         else:
             fit_signal = ROOT.RooKeysPdf("fit_signal", "fit_signal", x, data, ROOT.RooKeysPdf.MirrorBoth, 2)
@@ -235,11 +235,11 @@ def fitInvMass(df, title, massbin = [2.96, 3.04], nbins = 40, sigpdf = "Gauss", 
         else:
             bkgNormcount = model.pdfList().at(1).createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(x),ROOT.RooFit.Range("signal"))
             bkgcount = bkgNormcount.getVal() * n_bkg.getVal()
-            unc_bkg = n_bkg.getError()*bkgNormcount.getVal()
+            unc_bkg = n_bkg.getError() * bkgNormcount.getVal()
 
     sigNormcount = model.pdfList().at(0).createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(x),ROOT.RooFit.Range("signal"))
     sigcount = sigNormcount.getVal() * n_signal.getVal()
-    unc_sig = n_signal.getError()*sigNormcount.getVal()
+    unc_sig = n_signal.getError() * sigNormcount.getVal()
     
     if ifDrawStats:   
         paveText = ROOT.TPaveText(0.55, 0.6, 0.9, 0.9, "NDC")
@@ -267,17 +267,17 @@ def fitInvMass(df, title, massbin = [2.96, 3.04], nbins = 40, sigpdf = "Gauss", 
         xframe.addObject(paveText)
         paveText.Draw()
     
-    para = []
-    para.extend([mu,sigma])
+    paras = []
+    paras.extend([mu,sigma])
     if sigpdf == "DSCB":
-        para.extend([a1,n1,a2,n2])
+        paras.extend([a1,n1,a2,n2])
     if sigpdf == "KDE":
-        para = [fit_signal]
-    para.append(x)
-    return (xframe, n_signal, bkgcount, para)
+        paras = [fit_signal]
+    paras.append(x)
+    return (xframe, n_signal, bkgcount, paras)
 
 # ****************************************
-def ndarray2roo(ndarray, var):
+def ndarray2roo(ndarray, var, data_name='data'):
     if isinstance(ndarray, ROOT.RooDataSet):
         print('Already a RooDataSet')
         return ndarray
@@ -296,7 +296,7 @@ def ndarray2roo(ndarray, var):
         tree.Fill()
 
     array_roo = ROOT.RooDataSet(
-        'data', 'dataset from tree', tree, ROOT.RooArgSet(var))
+        f"data_name", 'dataset from tree', tree, ROOT.RooArgSet(var))
     return array_roo
 
 # ****************************************
@@ -309,7 +309,7 @@ def convert_sel_to_string(selection):
     return sel_string[:-len(conj)]
 
 # ****************************************
-def apply_pt_rejection(df, pt_shapeList, cent_bin_list, pt_bin_list, option="Default", path=""):
+def apply_pt_rejection(df, pt_shapeList, cent_bin_list, pt_bin_list, ptcolumn="fGenPt", option="Default", path=""):
     #Reweight hypertriton spectrum for MC dataset
     if option.upper() == "READ":
         rej_flag = pickle.load(open(path, "rb"))
@@ -317,12 +317,12 @@ def apply_pt_rejection(df, pt_shapeList, cent_bin_list, pt_bin_list, option="Def
         rej_flag = np.ones(len(df), dtype=bool)
         random_arr = np.random.rand(len(df))
         
-        for ind, (centrality, ptMC, rand) in enumerate(zip(df['fCentrality'], df['fGenPt'], random_arr)):
+        for ind, (centrality, pt, rand) in enumerate(zip(df['fCentrality'], df[ptcolumn], random_arr)):
             for centbin, ptbins, pt_shape in zip(cent_bin_list, pt_bin_list, pt_shapeList):
                 if centrality >= centbin[0] and centrality < centbin[1]:
                     for ptbin in ptbins:
-                        if ptMC >= ptbin[0] and ptMC < ptbin[1]:
-                            frac = pt_shape.Eval(ptMC)/pt_shape.GetMaximum(ptbin[0], ptbin[1])
+                        if pt >= ptbin[0] and pt < ptbin[1]:
+                            frac = pt_shape.Eval(pt)/pt_shape.GetMaximum(ptbin[0], ptbin[1])
                             if rand < frac:
                                 rej_flag[ind] = False
                             continue
