@@ -7,24 +7,28 @@ import sys
 sys.path.append('../include')
 import myHeader as myH
 
-def simultaneousFit(df_se, df_mixing, outfile, mcparas = "", title = "", extraBkgPdf = "pol1", bkgPdf = "argus", extraMixedBkgPdf = "pol0"):
+def simultaneousFit(df_se, df_mixing_deuteron, df_mixing_proton, outfile, mcparas = "", title = "", corr_bkgPdf = "DSCB", uncorr_bkgPdf = "pol1"):
     ''' Simultaneous fit to signal and background modeled by mixing events'''
 
     ############### Initialize the dataset ###############
     # Define the mass variable
     x = RooRealVar("x", "Invariant Mass", 2.96, 3.04)
+    xMirrored = ROOT.RooFormulaVar("xMirrored", "xMirrored", "3.08-x", ROOT.RooArgList(x)) # for argus
+    xShifted =  ROOT.RooFormulaVar("xShifted", "xShifted", "x-3.04", ROOT.RooArgList(x))   # to define the parameters of pol better
 
     # Convert pandas data to RooFit dataset
     data_se = myH.ndarray2roo(np.array(df_se['fM']), x, "data_se")
-    data_mixing = myH.ndarray2roo(np.array(df_mixing['fM']), x, "data_mixing")
+    data_mixing_deuteron = myH.ndarray2roo(np.array(df_mixing_deuteron['fM']), x, "data_mixing_deuteron")
+    data_mixing_proton = myH.ndarray2roo(np.array(df_mixing_proton['fM']), x, "data_mixing_proton")
 
     # Category to distinguish datasets
     sample = RooCategory("sample", "Sample Type")
     sample.defineType("same_event")
-    sample.defineType("mixed_event")
+    sample.defineType("mixed_deuteron")
+    sample.defineType("mixed_proton")
 
     # Combine datasets
-    combData = RooDataSet("combData", "Combined Data", RooArgList(x), RooFit.Index(sample), RooFit.Import("same_event", data_se), RooFit.Import("mixed_event", data_mixing))
+    combData = RooDataSet("combData", "Combined Data", RooArgList(x), RooFit.Index(sample), RooFit.Import("same_event", data_se), RooFit.Import("mixed_deuteron", data_mixing_deuteron), RooFit.Import("mixed_proton", data_mixing_proton))
 
     ############### Define Signal function ###############
     mu = ROOT.RooRealVar("#mu", "mu", 2.991, 2.986, 2.996)
@@ -46,26 +50,32 @@ def simultaneousFit(df_se, df_mixing, outfile, mcparas = "", title = "", extraBk
     n2.setConstant(ROOT.kTRUE)
     signal = ROOT.RooCrystalBall("signal", "signal", x, mu, sigma, a1, n1, a2, n2)
 
+    ############### Define uncorrected background function (background from mixing proton) ###############
+    if uncorr_bkgPdf == "exp":
+        c1 = ROOT.RooRealVar('c1', 'c1', 35., 10., 100.)
+        uncorr_bkg = ROOT.RooExponential('uncorr_bkg', 'uncorr_bkg', x, c1)
+    elif uncorr_bkgPdf == "pol1":
+        c1 = ROOT.RooRealVar('c1', 'c1', 3, 0, 12)
+        uncorr_bkg = ROOT.RooPolynomial("uncorr_bkg", "uncorr_bkg", xShifted, ROOT.RooArgList(c1))
+
     ############### Define Mixing Background function ###############
-    xMirrored = ROOT.RooFormulaVar("xMirrored", "xMirrored", "3.08-x", ROOT.RooArgList(x))
-    xShifted =  ROOT.RooFormulaVar("xShifted", "xShifted", "x-3.04", ROOT.RooArgList(x))
-    if bkgPdf == "argus":
+    if corr_bkgPdf == "argus":
         argus_m0 = ROOT.RooRealVar("argus_m0", "argus_m0", 0.095, 0.07, 0.15)
         argus_c = ROOT.RooRealVar("argus_c", "argus_c", -6, -10, -1)
         argus_p = ROOT.RooRealVar("argus_p", "argus_p", 2, 0.5, 10)
         argus_bkg = ROOT.RooArgusBG("argus_bkg", "argus_bkg", xMirrored, argus_m0, argus_c, argus_p)
-        default_bkg = argus_bkg
-    elif bkgPdf == "atan":
+        corr_bkg = argus_bkg
+    elif corr_bkgPdf == "atan":
         atan_a = ROOT.RooRealVar("atan_a", "atan_a", 0.3, 0.00001, 1000)
         atan_b = ROOT.RooRealVar("atan_b", "atan_b", -1, -1000, 0)
         atan_bkg = ROOT.RooATan("atan_bkg", "atan_bkg", x, atan_a, atan_b)
-        default_bkg = atan_bkg
-    elif bkgPdf == "Landau":
+        corr_bkg = atan_bkg
+    elif corr_bkgPdf == "Landau":
         landau_m0 = ROOT.RooRealVar("landau_m0", "landau_m0", 2.996, 2.986, 3.01)
         landau_sigma = ROOT.RooRealVar("landau_sigma", "landau_sigma", 0.0005, 0.1)
         landau_bkg = ROOT.RooLandau("landau_bkg", "landau_bkg", x, landau_m0, landau_sigma)
-        default_bkg = landau_bkg
-    elif bkgPdf == "DSCB":
+        corr_bkg = landau_bkg
+    elif corr_bkgPdf == "DSCB":
         bkg_mu = ROOT.RooRealVar("bkg_#mu", "bkg_mu", 2.996, 2.986, 3.01)
         bkg_sigma = ROOT.RooRealVar("bkg_#sigma", "bkg_sigma", 0.0005, 0.01)
         bkg_a1 = ROOT.RooRealVar("bkg_a_{1}", "bkg_a1", 0.1, 2)
@@ -73,44 +83,22 @@ def simultaneousFit(df_se, df_mixing, outfile, mcparas = "", title = "", extraBk
         bkg_a2 = ROOT.RooRealVar("bkg_a_{2}", "bkg_a2", 0.1, 2)
         bkg_n2 = ROOT.RooRealVar("bkg_n_{2}", "bkg_n2", 0.1, 10)
         dscb_bkg = ROOT.RooCrystalBall("dscb_bkg", "dscb_bkg", x, bkg_mu, bkg_sigma, bkg_a1, bkg_n1, bkg_a2, bkg_n2)
-        default_bkg = dscb_bkg
-    elif bkgPdf == "pol5":
+        corr_bkg = dscb_bkg
+    elif corr_bkgPdf == "pol5": # FIXME: adjust the range of parameters to make it work
         bkg_a1 = ROOT.RooRealVar("bkg_a1", "bkg_a1", -20, 20)
         bkg_a2 = ROOT.RooRealVar("bkg_a2", "bkg_a2", -20, 20)
         bkg_a3 = ROOT.RooRealVar("bkg_a3", "bkg_a3", -20, 20)
         bkg_a4 = ROOT.RooRealVar("bkg_a4", "bkg_a4", -20, 20)
         bkg_a5 = ROOT.RooRealVar("bkg_a5", "bkg_a5", -20, 20)
         poly_bkg = ROOT.RooPolynomial("poly_bkg", "poly_bkg", x, ROOT.RooArgList(bkg_a1, bkg_a2, bkg_a3, bkg_a4, bkg_a5))
-        default_bkg = poly_bkg
-    if extraMixedBkgPdf == "exp":
-        mixed_s1 = ROOT.RooRealVar('mixed_s1', 'mixed_s1', 0.1, 0.00001, 1000)
-        exp_bkg = ROOT.RooExponential('exp_bkg', 'exp_bkg', x, mixed_s1)
-        extra_mixedbkg = exp_bkg
-    elif extraMixedBkgPdf == "pol1":
-        mixed_c1 = ROOT.RooRealVar('mixed_c1', 'mixed_c1', -200., 200)
-        poly_bkg = ROOT.RooPolynomial("poly_bkg", "poly_bkg", x, ROOT.RooArgList(mixed_c1))
-        extra_mixedbkg = poly_bkg
-    elif extraMixedBkgPdf == "pol0":
-        poly_bkg = ROOT.RooPolynomial("poly_bkg", "poly_bkg", x, ROOT.RooArgList())
-        extra_mixedbkg = poly_bkg
+        corr_bkg = poly_bkg
     
-    mixed_frac = RooRealVar("mixed_frac", "Mixed Fraction", 0.5, 0.0, 1.0)
-    if extraMixedBkgPdf == "none":
-        mixed_bkg = default_bkg
-    else:
-        mixed_bkg = ROOT.RooAddPdf("mixed_bkg", "mixed_bkg", RooArgList(default_bkg, extra_mixedbkg), RooArgList(mixed_frac))
-    
-    ############### Define extra background function in signal (to be replaced by fitting background from mixing proton) ###############
-    if extraBkgPdf == "exp":
-        c1 = ROOT.RooRealVar('c1', 'c1', 35., 10., 100.)
-        extra_bkg = ROOT.RooExponential('extra_bkg', 'extra_bkg', x, c1)
-    elif extraBkgPdf == "pol1":
-        c1 = ROOT.RooRealVar('c1', 'c1', 3, 0, 12)
-        extra_bkg = ROOT.RooPolynomial("extra_bkg", "extra_bkg", xShifted, ROOT.RooArgList(c1))
+    frac_corr_mixing_deuteron = RooRealVar("frac_corr_mixing_deuteron", "correlated background fraction while mixing deuterons", 0.5, 0.0, 1.0)
+    bkg_mixing_deuteron = ROOT.RooAddPdf("bkg_mixing_deuteron", "bkg_mixing_deuteron", RooArgList(corr_bkg, uncorr_bkg), RooArgList(frac_corr_mixing_deuteron))
 
     ############### Define Background function ###############
-    frac = RooRealVar("frac", "Signal Fraction", 0.5, 0., 1.)
-    bkg_pdf = RooAddPdf("bkg_pdf", "Background", RooArgList(mixed_bkg, extra_bkg), RooArgList(frac))
+    frac_corr = RooRealVar("frac_corr", "correlated background fraction", 0.5, 0., 1.)
+    bkg_pdf = RooAddPdf("bkg_pdf", "Background", RooArgList(corr_bkg, uncorr_bkg), RooArgList(frac_corr))
 
     ############### Define Composite model  ###############
     fsig = RooRealVar("fsig", "signal peak fraction", 0.5, 0., 1.)
@@ -118,7 +106,8 @@ def simultaneousFit(df_se, df_mixing, outfile, mcparas = "", title = "", extraBk
 
     # Simultaneous PDF setup
     simPdf = RooSimultaneous("simPdf", "Simultaneous PDF", sample)
-    simPdf.addPdf(mixed_bkg, "mixed_event")  # Background only fit to AO2D_mixing
+    simPdf.addPdf(bkg_mixing_deuteron, "mixed_deuteron")  # Background only fit to AO2D_mixing
+    simPdf.addPdf(uncorr_bkg, "mixed_proton")  # Extra background fit to AO2D_mixing
     simPdf.addPdf(total_pdf, "same_event")  # Signal + Background fit to AO2D_se
 
     # Perform simultaneous fit
@@ -133,8 +122,8 @@ def simultaneousFit(df_se, df_mixing, outfile, mcparas = "", title = "", extraBk
     data_se.plotOn(frame1, RooFit.Binning(nBins))  # Set binning for data
     total_pdf.plotOn(frame1, RooFit.LineColor(ROOT.kBlue))
     chi2Val = frame1.chiSquare()
-    total_pdf.plotOn(frame1, RooFit.Components(default_bkg.GetName()), RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(ROOT.kRed))
-    total_pdf.plotOn(frame1, RooFit.Components(extra_bkg.GetName()), RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(ROOT.kGreen))
+    total_pdf.plotOn(frame1, RooFit.Components(corr_bkg.GetName()), RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(ROOT.kRed))
+    total_pdf.plotOn(frame1, RooFit.Components(uncorr_bkg.GetName()), RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(ROOT.kGreen))
     # total_pdf.plotOn(frame1, RooFit.Components("signal"), RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(ROOT.kRed))
     total_pdf.paramOn(frame1, Layout = [0.2, 0.4, 0.9])
 
@@ -178,15 +167,14 @@ def simultaneousFit(df_se, df_mixing, outfile, mcparas = "", title = "", extraBk
     frame1.Draw()
     paveText.Draw()
 
-    c_mixing = ROOT.TCanvas("ME_" + title, "ME", 800, 800)
-    c_mixing.cd()
+    c_mixing_deuteron = ROOT.TCanvas("ME_d " + title, "ME_d", 800, 800)
+    c_mixing_deuteron.cd()
     frame3 = x.frame(RooFit.Bins(nBins))  # Apply binning
-    data_mixing.plotOn(frame3, RooFit.Binning(nBins))  # Set binning for data
-    mixed_bkg.plotOn(frame3, RooFit.Components(default_bkg.GetName()), RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(ROOT.kRed))
-    if extraMixedBkgPdf != "none":
-        mixed_bkg.plotOn(frame3, RooFit.Components(extra_mixedbkg.GetName()), RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(ROOT.kGreen))
-    mixed_bkg.paramOn(frame3, Layout = [0.2, 0.4, 0.9])
+    data_mixing_deuteron.plotOn(frame3, RooFit.Binning(nBins))  # Set binning for data
+    bkg_mixing_deuteron.plotOn(frame3, RooFit.Components(corr_bkg.GetName()), RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(ROOT.kRed))
+    bkg_mixing_deuteron.paramOn(frame3, Layout = [0.2, 0.4, 0.9])
     chi2Val = frame3.chiSquare()
+    bkg_mixing_deuteron.plotOn(frame3, RooFit.Components(uncorr_bkg.GetName()), RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(ROOT.kGreen))
     label = ROOT.TPaveText(0.15, 0.25, 0.25, 0.35, "NDC")
     label.AddText(f"#chi^{{2}} = {chi2Val:.2f}")
     label.SetFillColor(0)
@@ -194,14 +182,32 @@ def simultaneousFit(df_se, df_mixing, outfile, mcparas = "", title = "", extraBk
     frame3.addObject(label)
     frame3.GetXaxis().SetTitle( 'm(p+#pi+d) (GeV/c^{2})' )
     frame3.GetYaxis().SetTitle(frame3.GetYaxis().GetTitle()[:-1] + 'GeV/c^{2} )')
-    frame3.SetTitle(c_mixing.GetTitle() + " " + title)
+    frame3.SetTitle(c_mixing_deuteron.GetTitle() + " " + title)
     frame3.Draw()
+
+    c_mixing_proton = ROOT.TCanvas("ME_p " + title, "ME_p", 800, 800)
+    c_mixing_proton.cd()
+    frame4 = x.frame(RooFit.Bins(nBins))  # Apply binning
+    data_mixing_proton.plotOn(frame4, RooFit.Binning(nBins))  # Set binning for data
+    uncorr_bkg.plotOn(frame4, RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(ROOT.kGreen))
+    uncorr_bkg.paramOn(frame4, Layout = [0.2, 0.4, 0.9])
+    chi2Val = frame4.chiSquare()
+    label = ROOT.TPaveText(0.15, 0.25, 0.25, 0.35, "NDC")
+    label.AddText(f"#chi^{{2}} = {chi2Val:.2f}")
+    label.SetFillColor(0)
+    label.SetBorderSize(0)
+    frame4.addObject(label)
+    frame4.GetXaxis().SetTitle( 'm(p+#pi+d) (GeV/c^{2})' )
+    frame4.GetYaxis().SetTitle(frame4.GetYaxis().GetTitle()[:-1] + 'GeV/c^{2} )')
+    frame4.SetTitle(c_mixing_proton.GetTitle() + " " + title)
+    frame4.Draw()
 
     outfile.cd()
     c.Write()
-    c_mixing.Write()
+    c_mixing_deuteron.Write()
+    c_mixing_proton.Write()
 
-    if expNBkg < 0.1:
+    if expNBkg < 0.1: # avoid divide by 0
         expNBkg = 0.1
 
     return (nSignal, nSignal_err, expNBkg)
