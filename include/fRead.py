@@ -102,11 +102,11 @@ def getBkgAO2DPath(dataType, method, period=None):
         elif dataType == "24skimmed_newReduced":
             path = []
             if "am" in period:
-                path.append('../data/newReduced/LHC24am_pass1_skimmed_reduced_LikeSign_AO2D.root')
+                path.append('../data/newReduced/LHC24am_newReduced_LikeSign_AO2D.root')
             if "an" in period:
-                path.append('../data/newReduced/LHC24an_pass1_skimmed_reduced_LikeSign_AO2D.root')
+                path.append('../data/newReduced/LHC24an_newReduced_LikeSign_AO2D.root')
             if "ao" in period:
-                path.append('../data/newReduced/LHC24ao_pass1_skimmed_reduced_LikeSign_AO2D.root')
+                path.append('../data/newReduced/LHC24ao_newReduced_LikeSign_AO2D.root')
         else:
             raise ValueError("No corresponding Like-sign background data")
     else:
@@ -128,7 +128,7 @@ def getMCTH(dataType, period=None):
 
 # ****************************************
 def getBkgTH(dataType, method, DataTH = None, period = None):
-    if method == "test":
+    if method == "mixed_deuteron":
         # BkgTH = TreeHandler("../data/newReduced/LHC24amao_pass1_skimmed_reduced_EM5000000_AO2D.root",'O2hyp3bodycands', folder_name='DF*')
         # BkgTH = TreeHandler("../data/newReduced/LHC24amao_pass1_skimmed_newReducedTest_EM5000000_AO2D.root",'O2hyp3bodycands', folder_name='DF*')
         # BkgTH = TreeHandler("../data/newReduced/LHC24amao_newReducedTest_NoCutOnCosPAV0_EM2000_AO2D.root",'O2hyp3bodycands', folder_name='DF*')
@@ -136,7 +136,10 @@ def getBkgTH(dataType, method, DataTH = None, period = None):
         # BkgTH = TreeHandler("../data/newReduced/LHC24amao_newReducedTest_noV0CosPAXYCut_EM2000_AO2D.root",'O2hyp3bodycands', folder_name='DF*')
         # BkgTH = TreeHandler("../data/newReduced/LHC24amao_newReduced_NoV0Cut_EM5000000_AO2D.root",'O2hyp3bodycands', folder_name='DF*')
         # BkgTH = TreeHandler("../data/newReduced/LHC24amao_pass1_skimmed_reduced_EM5000000_pdmixed_AO2D.root",'O2hyp3bodycands', folder_name='DF*')
-        BkgTH = TreeHandler(["../data/newReduced/LHC24amao_merged_newReducedTest_posZDiff2.5_EM5000000_AO2D.root", "../data/newReduced/LHC24an_merged_newReducedTest_posZDiff2.5_EM5000000_AO2D.root"],'O2hyp3bodycands', folder_name='DF*')
+        # BkgTH = TreeHandler(["../data/newReduced/LHC24amao_merged_newReducedTest_posZDiff2.5_EM5000000_AO2D.root", "../data/newReduced/LHC24an_merged_newReducedTest_posZDiff2.5_EM5000000_AO2D.root"],'O2hyp3bodycands', folder_name='DF*')
+        BkgTH = TreeHandler(["../data/newReduced/LHC24amao_newReduced_mixingDeuteron_AO2D.root", "../data/newReduced/LHC24an_newReduced_mixingDeuteron_AO2D.root"],'O2hyp3bodycands', folder_name='DF*')
+    elif method == "mixed_proton":
+        BkgTH = TreeHandler(["../data/newReduced/LHC24amao_newReduced_mixingProton_AO2D.root", "../data/newReduced/LHC24an_newReduced_mixingProton_AO2D.root"],'O2hyp3bodycands', folder_name='DF*')
     elif method == "Sideband":
         if DataTH == None:
             raise ValueError("Input dataTH for background tree")
@@ -159,7 +162,7 @@ def getEventNumber(dataType, period = None):
         if dataType == "24skimmed":
             return 1.2403e+12
         elif dataType == "24skimmed_reduced":
-            return 1.23826967e+12 # to be fixed
+            return 1.1804801e+12
             # num = 0
             # if "am" in period:
             #     num += 4.8902132e+11
@@ -183,45 +186,55 @@ def getHypertritonPtShape(dataType):
     return tf
 
 # ****************************************
-def getAbsorpFactor(CENT_BIN_LIST, PT_BIN_LIST, absorp_file = "../absorb/AbsorpResults_1.5.root"):
+def getAbsorpFactor(CENT_BIN_LIST, PT_BIN_LIST, absorp_file = "../CC_file/absorption_histos_3b.root"):
+    if PT_BIN_LIST != [[[2, 3], [3, 5]]]:
+        raise ValueError("Wrong PT_BIN")
     fAbsorption = ROOT.TFile(absorp_file, "READ")
-    #hAbsorption = [fAbsorption.Get("AbsorbRatio_0_10"), fAbsorption.Get("AbsorbRatio_10_30"), fAbsorption.Get("AbsorbRatio30_50"), fAbsorption.Get("AbsorbRatio50_90")]
-    hAbsorption = []
+    hAbsorptionMatter = fAbsorption.Get("x1.5/h_abso_frac_pt_mat")
+    hAbsorptionAntiMatter = fAbsorption.Get("x1.5/h_abso_frac_pt_antimat")
     AbsorbFactor = myH.createEmptyList( [len(CENT_BIN_LIST)] )
     for icent, centbin in enumerate(CENT_BIN_LIST):
-        hAbsorption.append( fAbsorption.Get("AbsorpRatio_" + str(centbin[0]) + "_" + str(centbin[1]) ) )
         for ipt, ptbin in enumerate( PT_BIN_LIST[icent] ):
-            AbsorbFactor[icent].append(hAbsorption[icent].GetBinContent( hAbsorption[icent].FindBin( (ptbin[0] + ptbin[1])/2. )) )
+            fabso = hAbsorptionMatter.GetBinContent(ipt + 1)
+            fabso += hAbsorptionAntiMatter.GetBinContent(ipt + 1)
+            fabso = fabso / 2
+            AbsorbFactor[icent].append(fabso)
     return AbsorbFactor
 
 # ****************************************
-def getAbsorpSyst(CENT_BIN_LIST, PT_BIN_LIST, absorp_syst_file = "../absorb/AbsorpResults_1.5.root"):
-    ''' Absorption results with larger cross section used to calculate systematical uncertainties '''
+# def getAbsorpSyst(CENT_BIN_LIST, PT_BIN_LIST, absorp_syst_file = "../absorb/AbsorpResults_1.5.root"):
+#     ''' Absorption results with larger cross section used to calculate systematical uncertainties '''
 
-    fAbsorption = ROOT.TFile(absorp_syst_file, "READ")
-    #hAbsorption = [fAbsorption.Get("AbsorbRatio_0_10"), fAbsorption.Get("AbsorbRatio_10_30"), fAbsorption.Get("AbsorbRatio30_50"), fAbsorption.Get("AbsorbRatio50_90")]
-    hAbsorption = []
-    AbsorbFactor = myH.createEmptyList( [len(CENT_BIN_LIST)] )
-    for icent, centbin in enumerate(CENT_BIN_LIST):
-        hAbsorption.append( fAbsorption.Get("AbsorpRatio_" + str(centbin[0]) + "_" + str(centbin[1]) ) )
-        for ipt, ptbin in enumerate( PT_BIN_LIST[icent] ):
-            AbsorbFactor[icent].append(hAbsorption[icent].GetBinContent( hAbsorption[icent].FindBin( (ptbin[0] + ptbin[1])/2. )) )
-    return AbsorbFactor
+#     fAbsorption = ROOT.TFile(absorp_syst_file, "READ")
+#     #hAbsorption = [fAbsorption.Get("AbsorbRatio_0_10"), fAbsorption.Get("AbsorbRatio_10_30"), fAbsorption.Get("AbsorbRatio30_50"), fAbsorption.Get("AbsorbRatio50_90")]
+#     hAbsorption = []
+#     AbsorbFactor = myH.createEmptyList( [len(CENT_BIN_LIST)] )
+#     for icent, centbin in enumerate(CENT_BIN_LIST):
+#         hAbsorption.append( fAbsorption.Get("AbsorpRatio_" + str(centbin[0]) + "_" + str(centbin[1]) ) )
+#         for ipt, ptbin in enumerate( PT_BIN_LIST[icent] ):
+#             AbsorbFactor[icent].append(hAbsorption[icent].GetBinContent( hAbsorption[icent].FindBin( (ptbin[0] + ptbin[1])/2. )) )
+#     return AbsorbFactor
 
 # ****************************************
 def getH3L2bodyYield(PT_BIN_LIST):
     # Readin hypertriton yield from 2-body decay analysis
     if PT_BIN_LIST == [[[2, 2.4], [2.4, 3.5], [3.5, 5]]]: # Temparary solution to PT_BIN [[[2, 2.4], [2.4, 3.5], [3.5, 5]]]
-        f = ROOT.TFile("../CC_file/pt_analysis_antimat_2024_newcut.root", "READ")
-        index_bins = [[2, 2], [3, 5], [6, 7]]
+        raise ValueError("Wrong PT_BIN")
+        # f = ROOT.TFile("../CC_file/pt_analysis_antimat_2024_newcut.root", "READ")
+        # index_bins = [[2, 2], [3, 5], [6, 7]]
     elif PT_BIN_LIST == [[[2, 2.3], [2.3, 2.6], [2.6, 5]]]: # Temparary solution to PT_BIN [[[2, 2.3], [2.3, 2.6], [2.6, 5]]]
-        f = ROOT.TFile("../CC_file/pt_analysis_antimat_merged.root", "READ")
+        f = ROOT.TFile("../CC_file/spectra_inel.root", "READ")
         index_bins = [[3, 3], [4, 4], [5, 8]]
+    elif PT_BIN_LIST == [[[2, 3], [3, 5]]]:
+        f = ROOT.TFile("../CC_file/spectra_inel.root", "READ")
+        index_bins = [[3, 5], [6, 8]]
+    elif PT_BIN_LIST == [[[2, 2.6], [2.6, 5]]]:
+        f = ROOT.TFile("../CC_file/spectra_inel.root", "READ")
+        index_bins = [[3, 4], [5, 8]]
     else:
         raise ValueError("Wrong PT_BIN")
-    # h_correct_counts = f.Get("std/h_corrected_counts")
-    hStat = f.Get("std/hStat")
-    hSystRMS = f.Get("std/hSystRMS")
+    hStat = f.Get("hStat")
+    hSystRMS = f.Get("hSystRMS")
     rawyield_2body = []
     statunc_2body = []
     systunc_2body = []
