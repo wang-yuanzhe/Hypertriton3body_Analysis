@@ -12,7 +12,8 @@ ROOT.gROOT.SetBatch(True)
 
 # kOrangeC  = ROOT.TColor.GetColor('#ff7f00')
 # kBlueC = ROOT.TColor.GetColor('#1f78b4')
-kBlueC = ROOT.kBlue+2
+kOrangeC = ROOT.kOrange+1
+kBlueC = ROOT.kAzure + 2
 kGreenC = ROOT.kSpring+3
 
 def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, ptlims, lowMassLim = 2.96, highMassLim = 3.04, simBkgFit = True, title = '', signalPdf = 'dscb', uncorr_bkgPdf = 'pol1', corr_bkgPdf = 'dscb', df_column = 'fMass'):
@@ -184,6 +185,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
 
   # Perform simultaneous fit
   simPdf.fitTo(combData)
+  # FIXME: Check if fit is good
 
   ############################################
   ############### Draw results ###############
@@ -193,12 +195,12 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   canvas_bkg_uncorr = ROOT.TCanvas("canvas_bkg_uncorr" + title, "Background uncorrelated", 800, 800)
   frame_bkg_uncorr = x.frame(RooFit.Bins(nBins))  # Apply binning
   data_mixingProton.plotOn(frame_bkg_uncorr, RooFit.Binning(nBins))
-  uncorr_bkg.plotOn(frame_bkg_uncorr, RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(kOrangeC))
+  uncorr_bkg.plotOn(frame_bkg_uncorr, RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(kGreenC))
+  chi2Val = frame_bkg_uncorr.chiSquare()
   frame_bkg_uncorr.GetYaxis().SetTitle(f'Counts / ({bin_width}' + ' GeV/#it{c}^{2})')
   frame_bkg_uncorr.GetXaxis().SetTitle('#it{M}(p+#pi+d) (GeV/#it{c}^{2})')
   frame_bkg_uncorr.SetTitle(canvas_bkg_uncorr.GetTitle() + " " + title)  # Set title for upper plot
-  label = ROOT.TPaveText(0.15, 0.25, 0.25, 0.35, "NDC")
-  chi2Val = frame_bkg_uncorr.chiSquare()
+  label = ROOT.TPaveText(0.15, 0.75, 0.25, 0.85, "NDC")
   label.AddText(f"#chi^{{2}} = {chi2Val:.2f}")
   label.SetFillColor(0)
   label.SetBorderSize(0)
@@ -210,16 +212,15 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   canvas_bkg_corr = ROOT.TCanvas("canvas_bkg_corr" + title, "Background correlated", 800, 800)
   frame_bkg_corr = x.frame(RooFit.Bins(nBins))  # Apply binning
   data_mixingDeuteron.plotOn(frame_bkg_corr, RooFit.Binning(nBins))
-  total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.LineColor(kBlueC))
+  total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.LineStyle(ROOT.kSolid), RooFit.LineColor(kOrangeC))
+  chi2Val = frame_bkg_corr.chiSquare()
   total_bkg_pdf.paramOn(frame_bkg_corr, Layout = [0.9, 0.6, 0.9])
   if simBkgFit == True:
-    total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.Components("uncorr_bkg"), RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(kOrangeC))
-  # total_bkg_pdf.paramOn(frame_bkg_corr)
+    total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.Components("uncorr_bkg"), RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(kGreenC))
   frame_bkg_corr.GetYaxis().SetTitle(f'Counts / ({bin_width}' + ' GeV/#it{c}^{2})')
   frame_bkg_corr.GetXaxis().SetTitle('#it{M}(p+#pi+d) (GeV/#it{c}^{2})')
   frame_bkg_corr.SetTitle(canvas_bkg_corr.GetTitle() + " " + title)  # Set title for upper plot
   label = ROOT.TPaveText(0.15, 0.25, 0.25, 0.35, "NDC")
-  chi2Val = frame_bkg_corr.chiSquare()
   label.AddText(f"#chi^{{2}} = {chi2Val:.2f}")
   label.SetFillColor(0)
   label.SetBorderSize(0)
@@ -314,7 +315,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   residuals = frame1.residHist("data", "background")
   frame_residuals = x.frame(RooFit.Bins(nBins))
   frame_residuals.addPlotable(residuals, "PE")  # Add residuals properly
-  signal.plotOn(frame_residuals, RooFit.LineColor(ROOT.kRed), RooFit.LineStyle(ROOT.kDashed), RooFit.Name("signal"))
+  signal.plotOn(frame_residuals, RooFit.LineColor(ROOT.kRed), RooFit.LineStyle(ROOT.kSolid), RooFit.Name("signal"))
   frame_residuals.SetTitle("")
   frame_residuals.GetXaxis().SetTitle('#it{M}(p+#pi+d) (GeV/#it{c}^{2})')
   frame_residuals.GetXaxis().SetTitleSize(0.1)
