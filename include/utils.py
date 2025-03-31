@@ -6,7 +6,10 @@ from copy import deepcopy
 
 ROOT.Math.IntegratorOneDimOptions.SetDefaultIntegrator("GaussLegendre") # To avoid warning
 
-kOrangeC  = ROOT.TColor.GetColor("#ff7f00")
+kBlueC = ROOT.kAzure-8
+kOrangeC = ROOT.kOrange-3
+kGreenC = ROOT.kSpring+3
+kRedC = ROOT.kRed+1
 
 # ****************************************
 def createEmptyList(size):
@@ -17,7 +20,7 @@ def createEmptyList(size):
     return list
     
 # ****************************************
-def gStyleInit():
+def set_style():
     # ROOT.gStyle.SetOptStat(0)
     # ROOT.gStyle.SetOptFit(1111) 
     ROOT.gStyle.SetPalette(1)
@@ -328,6 +331,14 @@ def convert_sel_to_string(selection):
         for _, val in sel.items():
             sel_string = sel_string + val + conj
     return sel_string[:-len(conj)]
+
+# ****************************************
+def convert_ptbin_to_dir(PT_BIN_LIST):
+    path = "pT"
+    for ptbin in PT_BIN_LIST:  # only one centrality bin
+        path = f"{path}{ptbin[0]}_"
+    path = f"{path}{PT_BIN_LIST[-1][-1]}"
+    return path
 
 # ****************************************
 def apply_pt_rejection(df, pt_shapeList, cent_bin_list, pt_bin_list, ptcolumn="fGenPt", option="Default", path=""):
