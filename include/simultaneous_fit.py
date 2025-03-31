@@ -257,7 +257,10 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     paveText_uncorr.AddText('ALICE Performance')
     paveText_uncorr.AddText('pp #sqrt{#it{s}} = 13.6 TeV')
     paveText_uncorr.AddText('{}_{#Lambda}^{3}H#rightarrow p+#pi+d + cc.')
-    paveText_uncorr.AddText('Mixed proton/pion background')
+    if cfg.isKFAnalysis:
+      paveText_uncorr.AddText('Mixed proton background')
+    else:
+      paveText_uncorr.AddText('Mixed proton/pion background')
     paveText_uncorr.AddText('{:.1f}'.format(ptlims[0]) + ' < #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
   else:
     paveText_uncorr = ROOT.TPaveText(0.15, 0.75, 0.25, 0.85, "NDC")
