@@ -275,7 +275,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   pad_corr_bkg.cd()
   frame_bkg_corr = x.frame(RooFit.Bins(nBins))  # Apply binning
   data_mixingDeuteron.plotOn(frame_bkg_corr, RooFit.Binning(nBins))
-  total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.LineStyle(ROOT.kDashed), RooFit.LineColor(utils.kOrangeC))
+  total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.LineStyle(7), RooFit.LineColor(utils.kOrangeC))
   chi2Val = frame_bkg_corr.chiSquare()
   if simBkgFit == True:
     total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.Components("uncorr_bkg"), RooFit.LineStyle(9), RooFit.LineColor(utils.kGreenC))
@@ -285,7 +285,8 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   frame_bkg_corr.GetYaxis().SetRangeUser(0, 1.2 * frame_bkg_corr.GetMaximum())
 
   if cfg.isPerformancePlotting:
-    paveText_corr = ROOT.TPaveText(0.15, 0.8, 0.45, 0.98, "NDC")
+    paveText_corr = ROOT.TPaveText(0.15, 0.85, 0.45, 0.98, "NDC")
+    # paveText_corr = ROOT.TPaveText(0.15, 0.8, 0.45, 0.98, "NDC")
     paveText_corr.SetName("paveText_corr")
     paveText_corr.SetBorderSize(0)
     paveText_corr.SetFillStyle(0)
