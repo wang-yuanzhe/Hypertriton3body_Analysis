@@ -354,9 +354,9 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   pad1.cd()
   frame1 = x.frame(RooFit.Bins(nBins))  # Apply binning
   data_se.plotOn(frame1, RooFit.Binning(nBins), RooFit.Name("data"))  # Set binning for data
-  total_pdf.plotOn(frame1, RooFit.Components("uncorr_bkg"), RooFit.LineStyle(9), RooFit.LineColor(utils.kGreenC))
+  total_pdf.plotOn(frame1, RooFit.Components("uncorr_bkg"), RooFit.LineStyle(9), RooFit.LineColor(utils.kGreenC), RooFit.Name("uncorr_bkg_fit"))
   total_pdf.plotOn(frame1, RooFit.Components("total_sig_bkg_pdf"), RooFit.LineStyle(7), RooFit.LineColor(utils.kOrangeC), RooFit.Name("background"))
-  total_pdf.plotOn(frame1, RooFit.LineColor(utils.kBlueC))
+  total_pdf.plotOn(frame1, RooFit.LineColor(utils.kBlueC), RooFit.Name("total_fit"))
   if cfg.isKFAnalysis:
     frame1.SetTitle('')
   else:
@@ -388,6 +388,16 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     paveText.AddText('')
     paveText.AddText('{}_{#Lambda}^{3}H#rightarrow p+#pi+d + cc.')
     paveText.AddText('{:.1f}'.format(ptlims[0]) + ' < #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
+
+    leg = ROOT.TLegend(0.67, 0.6, 0.9, 0.86)
+    leg.SetTextSize(0.04)
+    leg.AddEntry("data", "Data", "p")
+    leg.AddEntry("total_fit", "Total fit", "l")
+    leg.AddEntry("background", "Background", "l")
+    leg.AddEntry("uncorr_bkg_fit", "#splitline{Uncorrelated}{background}", "l")
+    leg.SetBorderSize(0)
+    leg.Draw()
+    frame1.addObject(leg)
   else:
     paveText = ROOT.TPaveText(0.14, 0.3, 0.5, 0.86, "NDC")
     paveText.AddText('')
@@ -408,7 +418,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   residuals = frame1.residHist("data", "background")
   frame_residuals = x.frame(RooFit.Bins(nBins))
   frame_residuals.addPlotable(residuals, "PE")  # Add residuals properly
-  signal.plotOn(frame_residuals, RooFit.LineColor(utils.kRedC), RooFit.LineStyle(ROOT.kSolid), RooFit.Name("signal"))
+  signal.plotOn(frame_residuals, RooFit.LineColor(utils.kRedC), RooFit.LineStyle(ROOT.kSolid), RooFit.Name("signal_fit"))
   frame_residuals.SetTitle("")
   frame_residuals.GetXaxis().SetTitle('#it{M}_{p+#pi+d} (GeV/#it{c}^{2})')
   frame_residuals.GetXaxis().SetTitleSize(0.1)
@@ -428,6 +438,12 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   line.SetLineWidth(2)
   frame_residuals.addObject(line)
   frame_residuals.Draw()
+  if cfg.isPerformancePlotting:
+    leg_signal = ROOT.TLegend(0.72, 0.7, 0.9, 0.9)
+    leg_signal.SetTextSize(0.08)
+    leg_signal.AddEntry("signal_fit", "Signal", "l")
+    frame_residuals.addObject(leg_signal)
+    leg_signal.Draw()
 
   # Update canvas
   canvas_signal.Update()
