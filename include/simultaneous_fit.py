@@ -244,24 +244,25 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   if cfg.isKFAnalysis:
     frame_bkg_uncorr.GetYaxis().SetRangeUser(0, 1.2 * frame_bkg_uncorr.GetMaximum())
   else:
-    frame_bkg_uncorr.GetYaxis().SetRangeUser(0, 1.5 * frame_bkg_uncorr.GetMaximum())
+    frame_bkg_uncorr.GetYaxis().SetRangeUser(0, 1.75 * frame_bkg_uncorr.GetMaximum())
 
   if cfg.isPerformancePlotting:
-    paveText_uncorr = ROOT.TPaveText(0.15, 0.55, 0.56, 0.85, "NDC")
+    if cfg.isKFAnalysis:
+      paveText_uncorr = ROOT.TPaveText(0.15, 0.55, 0.56, 0.85, "NDC")
+    else:
+      paveText_uncorr = ROOT.TPaveText(0.15, 0.5, 0.56, 0.85, "NDC")
     paveText_uncorr.SetName("paveText_uncorr")
     paveText_uncorr.SetBorderSize(0)
     paveText_uncorr.SetFillStyle(0)
     paveText_uncorr.SetTextFont(42)
     paveText_uncorr.SetTextAlign(11)
-    paveText_uncorr.SetTextSize(0.04)
+    paveText_uncorr.SetTextSize(0.045)
     paveText_uncorr.AddText('ALICE Performance')
     paveText_uncorr.AddText('pp #sqrt{#it{s}} = 13.6 TeV')
     paveText_uncorr.AddText('{}_{#Lambda}^{3}H#rightarrow p+#pi+d + cc.')
-    if cfg.isKFAnalysis:
-      paveText_uncorr.AddText('Mixed proton background')
-    else:
-      paveText_uncorr.AddText('Mixed proton/pion background')
     paveText_uncorr.AddText('{:.1f}'.format(ptlims[0]) + ' < #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
+    paveText_uncorr.AddText('')
+    paveText_uncorr.AddText('Mixed proton/pion background')
   else:
     paveText_uncorr = ROOT.TPaveText(0.15, 0.75, 0.25, 0.85, "NDC")
     paveText_uncorr.AddText(f"#chi^{{2}} = {chi2Val:.2f}")
@@ -284,13 +285,13 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   frame_bkg_corr.GetYaxis().SetRangeUser(0, 1.2 * frame_bkg_corr.GetMaximum())
 
   if cfg.isPerformancePlotting:
-    paveText_corr = ROOT.TPaveText(0.15, 0.75, 0.45, 0.95, "NDC")
+    paveText_corr = ROOT.TPaveText(0.15, 0.8, 0.45, 0.98, "NDC")
     paveText_corr.SetName("paveText_corr")
     paveText_corr.SetBorderSize(0)
     paveText_corr.SetFillStyle(0)
     paveText_corr.SetTextFont(42)
     paveText_corr.SetTextAlign(11)
-    paveText_corr.SetTextSize(0.04)
+    paveText_corr.SetTextSize(0.045)
     paveText_corr.AddText('Mixed deuteron background')
   else:
     total_bkg_pdf.paramOn(frame_bkg_corr, Layout = [0.9, 0.6, 0.9])
@@ -370,7 +371,10 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   frame1.Draw()
   # Info
   if cfg.isPerformancePlotting:
-    paveText = ROOT.TPaveText(0.15, 0.46, 0.52, 0.85, "NDC")
+    if cfg.isKFAnalysis:
+      paveText = ROOT.TPaveText(0.15, 0.46, 0.52, 0.85, "NDC")
+    else:
+      paveText = ROOT.TPaveText(0.15, 0.5, 0.52, 0.85, "NDC")
     paveText.SetName("paveText")
     paveText.SetBorderSize(0)
     paveText.SetFillStyle(0)
