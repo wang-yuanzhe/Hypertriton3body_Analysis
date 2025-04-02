@@ -234,23 +234,20 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   # Uncorrelated background pad_uncorr_bkg
   pad_uncorr_bkg.cd()
   frame_bkg_uncorr = x.frame(RooFit.Bins(nBins))  # Apply binning
-  data_mixingProton.plotOn(frame_bkg_uncorr, RooFit.Binning(nBins))
-  uncorr_bkg.plotOn(frame_bkg_uncorr, RooFit.LineStyle(9), RooFit.LineColor(utils.kGreenC))
+  data_mixingProton.plotOn(frame_bkg_uncorr, RooFit.Binning(nBins), RooFit.Name("data_uncorr"))
+  uncorr_bkg.plotOn(frame_bkg_uncorr, RooFit.LineStyle(9), RooFit.LineColor(utils.kGreenC), RooFit.Name('uncorr_bkg_fit_me'))
   chi2Val = frame_bkg_uncorr.chiSquare()
   frame_bkg_uncorr.SetTitle('')
   frame_bkg_uncorr.GetXaxis().SetTitle('')
   frame_bkg_uncorr.GetXaxis().SetLabelSize(0)
   frame_bkg_uncorr.GetYaxis().SetTitle(f'Counts / ({bin_width}' + ' GeV/#it{c}^{2})')
   if cfg.isKFAnalysis:
-    frame_bkg_uncorr.GetYaxis().SetRangeUser(0, 1.2 * frame_bkg_uncorr.GetMaximum())
-  else:
     frame_bkg_uncorr.GetYaxis().SetRangeUser(0, 1.75 * frame_bkg_uncorr.GetMaximum())
+  else:
+    frame_bkg_uncorr.GetYaxis().SetRangeUser(0, 2.3 * frame_bkg_uncorr.GetMaximum())
 
   if cfg.isPerformancePlotting:
-    if cfg.isKFAnalysis:
-      paveText_uncorr = ROOT.TPaveText(0.15, 0.55, 0.56, 0.85, "NDC")
-    else:
-      paveText_uncorr = ROOT.TPaveText(0.15, 0.5, 0.56, 0.85, "NDC")
+    paveText_uncorr = ROOT.TPaveText(0.15, 0.6, 0.56, 0.85, "NDC")
     paveText_uncorr.SetName("paveText_uncorr")
     paveText_uncorr.SetBorderSize(0)
     paveText_uncorr.SetFillStyle(0)
@@ -261,8 +258,18 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     paveText_uncorr.AddText('pp #sqrt{#it{s}} = 13.6 TeV')
     paveText_uncorr.AddText('{}_{#Lambda}^{3}H#rightarrow p+#pi+d + cc.')
     paveText_uncorr.AddText('{:.1f}'.format(ptlims[0]) + ' < #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
-    paveText_uncorr.AddText('')
-    paveText_uncorr.AddText('Mixed proton/pion background')
+    
+    leg_uncorr = ROOT.TLegend(0.15, 0.44, 0.56, 0.56)
+    leg_uncorr.SetTextSize(0.045)
+    if cfg.isKFAnalysis:
+      leg_uncorr.AddEntry(frame_bkg_uncorr.findObject("data_uncorr"), "Mixed proton background", "p")
+    else:
+      leg_uncorr.AddEntry(frame_bkg_uncorr.findObject("data_uncorr"), "Mixed proton/pion background", "p")
+    leg_uncorr.AddEntry(frame_bkg_uncorr.findObject("uncorr_bkg_fit_me"), "Uncorrelated background fit", "l")
+    leg_uncorr.SetBorderSize(0)
+    leg_uncorr.Draw()
+    frame_bkg_uncorr.addObject(leg_uncorr)
+
   else:
     paveText_uncorr = ROOT.TPaveText(0.15, 0.75, 0.25, 0.85, "NDC")
     paveText_uncorr.AddText(f"#chi^{{2}} = {chi2Val:.2f}")
@@ -270,37 +277,42 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     paveText_uncorr.SetBorderSize(0)
   frame_bkg_uncorr.addObject(paveText_uncorr)
   frame_bkg_uncorr.Draw()
+  pad_uncorr_bkg.cd()
 
   # Correlated background pad_corr_bkg
   pad_corr_bkg.cd()
   frame_bkg_corr = x.frame(RooFit.Bins(nBins))  # Apply binning
-  data_mixingDeuteron.plotOn(frame_bkg_corr, RooFit.Binning(nBins))
-  total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.LineStyle(7), RooFit.LineColor(utils.kOrangeC))
+  data_mixingDeuteron.plotOn(frame_bkg_corr, RooFit.Binning(nBins), RooFit.Name("data_corr"))
+  total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.LineStyle(7), RooFit.LineColor(utils.kOrangeC), RooFit.Name('total_bkg_fit_me'))
   chi2Val = frame_bkg_corr.chiSquare()
   if simBkgFit == True:
-    total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.Components("uncorr_bkg"), RooFit.LineStyle(9), RooFit.LineColor(utils.kGreenC))
+    total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.Components("uncorr_bkg"), RooFit.LineStyle(9), RooFit.LineColor(utils.kGreenC), RooFit.Name('uncorr_bkg_fit_meDeuteron'))
   frame_bkg_corr.SetTitle('')
   frame_bkg_corr.GetXaxis().SetTitle('#it{M}_{p+#pi+d} (GeV/#it{c}^{2})')
   frame_bkg_corr.GetYaxis().SetTitle(f'Counts / ({bin_width}' + ' GeV/#it{c}^{2})')
-  frame_bkg_corr.GetYaxis().SetRangeUser(0, 1.2 * frame_bkg_corr.GetMaximum())
+  if cfg.isKFAnalysis:
+    frame_bkg_corr.GetYaxis().SetRangeUser(0, 1.2 * frame_bkg_corr.GetMaximum())
+  else:
+    frame_bkg_corr.GetYaxis().SetRangeUser(0, 1.35 * frame_bkg_corr.GetMaximum())
 
   if cfg.isPerformancePlotting:
-    paveText_corr = ROOT.TPaveText(0.15, 0.85, 0.45, 0.98, "NDC")
-    # paveText_corr = ROOT.TPaveText(0.15, 0.8, 0.45, 0.98, "NDC")
-    paveText_corr.SetName("paveText_corr")
-    paveText_corr.SetBorderSize(0)
-    paveText_corr.SetFillStyle(0)
-    paveText_corr.SetTextFont(42)
-    paveText_corr.SetTextAlign(11)
-    paveText_corr.SetTextSize(0.045)
-    paveText_corr.AddText('Mixed deuteron background')
+    leg_corr = ROOT.TLegend(0.15, 0.78, 0.45, 0.95)
+    leg_corr.SetTextSize(0.045)
+    leg_corr.AddEntry(frame_bkg_corr.findObject("data_corr"), "Mixed deuteron background", "p")
+    leg_corr.AddEntry(frame_bkg_corr.findObject("total_bkg_fit_me"), "Total background fit", "l")
+    if simBkgFit == True:
+      leg_corr.AddEntry(frame_bkg_corr.findObject("uncorr_bkg_fit_meDeuteron"), "Uncorrelated background fit", "l")
+    leg_corr.SetBorderSize(0)
+    leg_corr.Draw()
+    frame_bkg_corr.addObject(leg_corr)
+
   else:
     total_bkg_pdf.paramOn(frame_bkg_corr, Layout = [0.9, 0.6, 0.9])
     paveText_corr = ROOT.TPaveText(0.15, 0.25, 0.25, 0.35, "NDC")
     paveText_corr.AddText(f"#chi^{{2}} = {chi2Val:.2f}")
     paveText_corr.SetFillColor(0)
     paveText_corr.SetBorderSize(0)
-  frame_bkg_corr.addObject(paveText_corr)
+    frame_bkg_corr.addObject(paveText_corr)
   frame_bkg_corr.Draw()
 
   ############### Draw total fit ###############
@@ -372,10 +384,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   frame1.Draw()
   # Info
   if cfg.isPerformancePlotting:
-    if cfg.isKFAnalysis:
-      paveText = ROOT.TPaveText(0.15, 0.46, 0.52, 0.85, "NDC")
-    else:
-      paveText = ROOT.TPaveText(0.15, 0.5, 0.52, 0.85, "NDC")
+    paveText = ROOT.TPaveText(0.15, 0.5, 0.52, 0.85, "NDC")
     paveText.SetName("paveText")
     paveText.SetBorderSize(0)
     paveText.SetFillStyle(0)
@@ -389,7 +398,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     paveText.AddText('{}_{#Lambda}^{3}H#rightarrow p+#pi+d + cc.')
     paveText.AddText('{:.1f}'.format(ptlims[0]) + ' < #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
 
-    leg = ROOT.TLegend(0.67, 0.6, 0.9, 0.86)
+    leg = ROOT.TLegend(0.67, 0.57, 0.9, 0.86)
     leg.SetTextSize(0.04)
     leg.AddEntry("data", "Data", "p")
     leg.AddEntry("total_fit", "Total fit", "l")
@@ -398,8 +407,15 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     leg.SetBorderSize(0)
     leg.Draw()
     frame1.addObject(leg)
+
   else:
     paveText = ROOT.TPaveText(0.14, 0.3, 0.5, 0.86, "NDC")
+    paveText.SetBorderSize(0)
+    paveText.SetFillStyle(0)
+    paveText.SetTextFont(42)
+    paveText.SetTextAlign(11)
+    paveText.AddText('LHC24am, LHC24an, LHC24ao pass1')
+    paveText.AddText('{0}'.format(ptlims[0]) + ' < #it{p}_{T} < ' + '{0}'.format(ptlims[1]) + ' GeV/#it{c}')
     paveText.AddText('')
     paveText.AddText('#mu = ' + str(round(mu.getValV(), 5)) + ' #pm ' + str(round(mu.getError(), 5)))
     paveText.AddText('#sigma = ' + str(round(sigma.getValV(), 5)) + ' #pm ' + str(round(sigma.getError(), 5)))
