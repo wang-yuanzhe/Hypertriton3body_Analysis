@@ -259,12 +259,12 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     paveText_uncorr.AddText('{}_{#Lambda}^{3}H#rightarrow d+p+#pi^{-} + cc.')
     paveText_uncorr.AddText('{:.1f}'.format(ptlims[0]) + ' #leq #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
     
-    leg_uncorr = ROOT.TLegend(0.15, 0.44, 0.56, 0.56)
+    leg_uncorr = ROOT.TLegend(0.15, 0.44, 0.45, 0.56) # set x range as same as leg_corr 
     leg_uncorr.SetTextSize(0.045)
     if cfg.isKFAnalysis:
-      leg_uncorr.AddEntry(frame_bkg_uncorr.findObject("data_uncorr"), "Mixed proton background", "p")
+      leg_uncorr.AddEntry(frame_bkg_uncorr.findObject("data_uncorr"), "Mixed proton background", "pe")
     else:
-      leg_uncorr.AddEntry(frame_bkg_uncorr.findObject("data_uncorr"), "Mixed proton/pion background", "p")
+      leg_uncorr.AddEntry(frame_bkg_uncorr.findObject("data_uncorr"), "Mixed proton/pion background", "pe")
     leg_uncorr.AddEntry(frame_bkg_uncorr.findObject("uncorr_bkg_fit_me"), "Uncorrelated background fit", "l")
     leg_uncorr.SetBorderSize(0)
     leg_uncorr.Draw()
@@ -291,14 +291,14 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   frame_bkg_corr.GetXaxis().SetTitle('#it{M}_{d+p+#pi^{-}} (GeV/#it{c}^{2})')
   frame_bkg_corr.GetYaxis().SetTitle(f'Counts / ({bin_width}' + ' GeV/#it{c}^{2})')
   if cfg.isKFAnalysis:
-    frame_bkg_corr.GetYaxis().SetRangeUser(0, 1.2 * frame_bkg_corr.GetMaximum())
+    frame_bkg_corr.GetYaxis().SetRangeUser(1e-2, 1.2 * frame_bkg_corr.GetMaximum())
   else:
-    frame_bkg_corr.GetYaxis().SetRangeUser(0, 1.35 * frame_bkg_corr.GetMaximum())
+    frame_bkg_corr.GetYaxis().SetRangeUser(1e-2, 1.35 * frame_bkg_corr.GetMaximum())
 
   if cfg.isPerformancePlotting:
     leg_corr = ROOT.TLegend(0.15, 0.78, 0.45, 0.95)
     leg_corr.SetTextSize(0.045)
-    leg_corr.AddEntry(frame_bkg_corr.findObject("data_corr"), "Mixed deuteron background", "p")
+    leg_corr.AddEntry(frame_bkg_corr.findObject("data_corr"), "Mixed deuteron background", "pe")
     leg_corr.AddEntry(frame_bkg_corr.findObject("total_bkg_fit_me"), "Total background fit", "l")
     if simBkgFit == True:
       leg_corr.AddEntry(frame_bkg_corr.findObject("uncorr_bkg_fit_meDeuteron"), "Uncorrelated background fit", "l")
@@ -400,7 +400,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
 
     leg = ROOT.TLegend(0.67, 0.57, 0.9, 0.86)
     leg.SetTextSize(0.04)
-    leg.AddEntry("data", "Data", "p")
+    leg.AddEntry("data", "Data", "pe")
     leg.AddEntry("total_fit", "Total fit", "l")
     leg.AddEntry("background", "Background", "l")
     leg.AddEntry("uncorr_bkg_fit", "#splitline{Uncorrelated}{background}", "l")
@@ -444,6 +444,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   frame_residuals.GetYaxis().SetTitleSize(0.1)
   frame_residuals.GetYaxis().SetLabelSize(0.08)
   frame_residuals.GetYaxis().SetTitleOffset(0.5)
+  frame_residuals.GetYaxis().SetRangeUser(0.9 * frame_residuals.GetMinimum(), frame_residuals.GetMaximum())
   frame_residuals.SetMarkerStyle(20)
   frame_residuals.SetMarkerSize(0.8)
   frame_residuals.SetLineColor(ROOT.kBlack)
