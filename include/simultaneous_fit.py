@@ -234,8 +234,13 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   # Uncorrelated background pad_uncorr_bkg
   pad_uncorr_bkg.cd()
   frame_bkg_uncorr = x.frame(RooFit.Bins(nBins))  # Apply binning
-  data_mixingProton.plotOn(frame_bkg_uncorr, RooFit.Binning(nBins), RooFit.Name("data_uncorr"))
+  data_mixingProton.plotOn(frame_bkg_uncorr, RooFit.Binning(nBins), RooFit.Name("data_uncorr_white"))
+  frame_bkg_uncorr.findObject("data_uncorr_white").SetMarkerColor(0)
+  frame_bkg_uncorr.findObject("data_uncorr_white").SetLineColor(0)
   uncorr_bkg.plotOn(frame_bkg_uncorr, RooFit.LineStyle(9), RooFit.LineColor(utils.kGreenC), RooFit.Name('uncorr_bkg_fit_me'))
+  data_mixingProton.plotOn(frame_bkg_uncorr, RooFit.Binning(nBins), RooFit.Name("data_uncorr"))
+  frame_bkg_uncorr.findObject("data_uncorr").SetMarkerColor(ROOT.kBlack)
+  frame_bkg_uncorr.findObject("data_uncorr").SetLineColor(ROOT.kBlack)
   chi2Val = frame_bkg_uncorr.chiSquare()
   frame_bkg_uncorr.SetTitle('')
   frame_bkg_uncorr.GetXaxis().SetTitle('')
@@ -258,8 +263,8 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     paveText_uncorr.AddText('pp #sqrt{#it{s}} = 13.6 TeV')
     paveText_uncorr.AddText('{}_{#Lambda}^{3}H#rightarrow d+p+#pi^{-} + cc.')
     paveText_uncorr.AddText('{:.1f}'.format(ptlims[0]) + ' #leq #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
-    
-    leg_uncorr = ROOT.TLegend(0.15, 0.44, 0.45, 0.56) # set x range as same as leg_corr 
+
+    leg_uncorr = ROOT.TLegend(0.15, 0.44, 0.45, 0.56)
     leg_uncorr.SetTextSize(0.045)
     if cfg.isKFAnalysis:
       leg_uncorr.AddEntry(frame_bkg_uncorr.findObject("data_uncorr"), "Mixed proton background", "pe")
@@ -282,18 +287,20 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   # Correlated background pad_corr_bkg
   pad_corr_bkg.cd()
   frame_bkg_corr = x.frame(RooFit.Bins(nBins))  # Apply binning
-  data_mixingDeuteron.plotOn(frame_bkg_corr, RooFit.Binning(nBins), RooFit.Name("data_corr"))
+  data_mixingDeuteron.plotOn(frame_bkg_corr, RooFit.Binning(nBins), RooFit.Name("data_corr_white"))
+  frame_bkg_corr.findObject("data_corr_white").SetMarkerColor(0)
+  frame_bkg_corr.findObject("data_corr_white").SetLineColor(0)
   total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.LineStyle(7), RooFit.LineColor(utils.kOrangeC), RooFit.Name('total_bkg_fit_me'))
+  data_mixingDeuteron.plotOn(frame_bkg_corr, RooFit.Binning(nBins), RooFit.Name("data_corr"))
+  frame_bkg_corr.findObject("data_corr").SetMarkerColor(ROOT.kBlack)
+  frame_bkg_corr.findObject("data_corr").SetLineColor(ROOT.kBlack)
   chi2Val = frame_bkg_corr.chiSquare()
   if simBkgFit == True:
     total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.Components("uncorr_bkg"), RooFit.LineStyle(9), RooFit.LineColor(utils.kGreenC), RooFit.Name('uncorr_bkg_fit_meDeuteron'))
   frame_bkg_corr.SetTitle('')
   frame_bkg_corr.GetXaxis().SetTitle('#it{M}_{d+p+#pi^{-}} (GeV/#it{c}^{2})')
   frame_bkg_corr.GetYaxis().SetTitle(f'Counts / ({bin_width}' + ' GeV/#it{c}^{2})')
-  if cfg.isKFAnalysis:
-    frame_bkg_corr.GetYaxis().SetRangeUser(1e-2, 1.2 * frame_bkg_corr.GetMaximum())
-  else:
-    frame_bkg_corr.GetYaxis().SetRangeUser(1e-2, 1.35 * frame_bkg_corr.GetMaximum())
+  frame_bkg_corr.GetYaxis().SetRangeUser(1e-2, 1.4 * frame_bkg_corr.GetMaximum())
 
   if cfg.isPerformancePlotting:
     leg_corr = ROOT.TLegend(0.15, 0.78, 0.45, 0.95)
@@ -365,10 +372,15 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   # Upper plot (full fit)
   pad1.cd()
   frame1 = x.frame(RooFit.Bins(nBins))  # Apply binning
-  data_se.plotOn(frame1, RooFit.Binning(nBins), RooFit.Name("data"))  # Set binning for data
+  data_se.plotOn(frame1, RooFit.Binning(nBins), RooFit.Name("data_white"))  # Set binning for data
+  frame1.findObject("data_white").SetMarkerColor(0)
+  frame1.findObject("data_white").SetLineColor(0)
   total_pdf.plotOn(frame1, RooFit.Components("uncorr_bkg"), RooFit.LineStyle(9), RooFit.LineColor(utils.kGreenC), RooFit.Name("uncorr_bkg_fit"))
   total_pdf.plotOn(frame1, RooFit.Components("total_sig_bkg_pdf"), RooFit.LineStyle(7), RooFit.LineColor(utils.kOrangeC), RooFit.Name("background"))
   total_pdf.plotOn(frame1, RooFit.LineColor(utils.kBlueC), RooFit.Name("total_fit"))
+  data_se.plotOn(frame1, RooFit.Binning(nBins), RooFit.Name("data"))  # Set binning for data
+  frame1.findObject("data").SetMarkerColor(ROOT.kBlack)
+  frame1.findObject("data").SetLineColor(ROOT.kBlack)
   if cfg.isKFAnalysis:
     frame1.SetTitle('')
   else:
@@ -395,7 +407,10 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     paveText.AddText('pp #sqrt{#it{s}} = 13.6 TeV')
     paveText.AddText('#it{L}_{int.} = 21 pb^{-1}')
     paveText.AddText('')
-    paveText.AddText('{}_{#Lambda}^{3}H#rightarrow d+p+#pi^{-} + cc.')
+    if cfg.isSTdata:
+      paveText.AddText('{}_{#Lambda}^{3}H#rightarrow d+p+#pi^{-} + cc. tracked')
+    else:
+      paveText.AddText('{}_{#Lambda}^{3}H#rightarrow d+p+#pi^{-} + cc.')
     paveText.AddText('{:.1f}'.format(ptlims[0]) + ' #leq #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
 
     leg = ROOT.TLegend(0.67, 0.57, 0.9, 0.86)
@@ -431,10 +446,23 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   paveText.Draw()
 
   pad2.cd()
+  residuals_white = frame1.residHist("data", "background")
   residuals = frame1.residHist("data", "background")
   frame_residuals = x.frame(RooFit.Bins(nBins))
-  frame_residuals.addPlotable(residuals, "PE")  # Add residuals properly
+  frame_residuals.addPlotable(residuals_white, "PE")  # Add residuals properly
+  residuals_white.SetMarkerColor(0)
+  residuals_white.SetLineColor(0)
   signal.plotOn(frame_residuals, RooFit.LineColor(utils.kRedC), RooFit.LineStyle(ROOT.kSolid), RooFit.Name("signal_fit"))
+  # Add dashed gray line at y=0
+  line = ROOT.TLine(2.96, 0, 3.02, 0)
+  line.SetLineColor(ROOT.kGray+2)
+  line.SetLineStyle(2)
+  line.SetLineWidth(2)
+  frame_residuals.addObject(line)
+  # Add data points again in black
+  frame_residuals.addPlotable(residuals, "PE")  # Add residuals properly
+  residuals.SetMarkerColor(ROOT.kBlack)
+  residuals.SetLineColor(ROOT.kBlack)
   frame_residuals.SetTitle("")
   frame_residuals.GetXaxis().SetTitle('#it{M}_{d+p+#pi^{-}} (GeV/#it{c}^{2})')
   frame_residuals.GetXaxis().SetTitleSize(0.1)
@@ -444,16 +472,13 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   frame_residuals.GetYaxis().SetTitleSize(0.1)
   frame_residuals.GetYaxis().SetLabelSize(0.08)
   frame_residuals.GetYaxis().SetTitleOffset(0.5)
-  frame_residuals.GetYaxis().SetRangeUser(0.9 * frame_residuals.GetMinimum(), frame_residuals.GetMaximum())
+  if cfg.isSTdata:
+    frame_residuals.GetYaxis().SetRangeUser(1.4 * frame_residuals.GetMinimum(), 1.1 * frame_residuals.GetMaximum())
+  else:
+    frame_residuals.GetYaxis().SetRangeUser(1.0 * frame_residuals.GetMinimum(), 1.2 * frame_residuals.GetMaximum())
   frame_residuals.SetMarkerStyle(20)
   frame_residuals.SetMarkerSize(0.8)
   frame_residuals.SetLineColor(ROOT.kBlack)
-  # Add dashed gray line at y=0
-  line = ROOT.TLine(2.96, 0, 3.02, 0)
-  line.SetLineColor(ROOT.kGray+2)
-  line.SetLineStyle(2)
-  line.SetLineWidth(2)
-  frame_residuals.addObject(line)
   frame_residuals.Draw()
   if cfg.isPerformancePlotting:
     leg_signal = ROOT.TLegend(0.72, 0.7, 0.9, 0.9)
