@@ -256,8 +256,8 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     paveText_uncorr.SetTextSize(0.045)
     paveText_uncorr.AddText('ALICE Performance')
     paveText_uncorr.AddText('pp #sqrt{#it{s}} = 13.6 TeV')
-    paveText_uncorr.AddText('{}_{#Lambda}^{3}H#rightarrow p+#pi+d + cc.')
-    paveText_uncorr.AddText('{:.1f}'.format(ptlims[0]) + ' < #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
+    paveText_uncorr.AddText('{}_{#Lambda}^{3}H#rightarrow d+p+#pi^{-} + cc.')
+    paveText_uncorr.AddText('{:.1f}'.format(ptlims[0]) + ' #leq #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
     
     leg_uncorr = ROOT.TLegend(0.15, 0.44, 0.56, 0.56)
     leg_uncorr.SetTextSize(0.045)
@@ -288,7 +288,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   if simBkgFit == True:
     total_bkg_pdf.plotOn(frame_bkg_corr, RooFit.Components("uncorr_bkg"), RooFit.LineStyle(9), RooFit.LineColor(utils.kGreenC), RooFit.Name('uncorr_bkg_fit_meDeuteron'))
   frame_bkg_corr.SetTitle('')
-  frame_bkg_corr.GetXaxis().SetTitle('#it{M}_{p+#pi+d} (GeV/#it{c}^{2})')
+  frame_bkg_corr.GetXaxis().SetTitle('#it{M}_{d+p+#pi^{-}} (GeV/#it{c}^{2})')
   frame_bkg_corr.GetYaxis().SetTitle(f'Counts / ({bin_width}' + ' GeV/#it{c}^{2})')
   if cfg.isKFAnalysis:
     frame_bkg_corr.GetYaxis().SetRangeUser(0, 1.2 * frame_bkg_corr.GetMaximum())
@@ -395,8 +395,8 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     paveText.AddText('pp #sqrt{#it{s}} = 13.6 TeV')
     paveText.AddText('#it{L}_{int.} = 21 pb^{-1}')
     paveText.AddText('')
-    paveText.AddText('{}_{#Lambda}^{3}H#rightarrow p+#pi+d + cc.')
-    paveText.AddText('{:.1f}'.format(ptlims[0]) + ' < #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
+    paveText.AddText('{}_{#Lambda}^{3}H#rightarrow d+p+#pi^{-} + cc.')
+    paveText.AddText('{:.1f}'.format(ptlims[0]) + ' #leq #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
 
     leg = ROOT.TLegend(0.67, 0.57, 0.9, 0.86)
     leg.SetTextSize(0.04)
@@ -415,7 +415,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
     paveText.SetTextFont(42)
     paveText.SetTextAlign(11)
     paveText.AddText('LHC24am, LHC24an, LHC24ao pass1')
-    paveText.AddText('{0}'.format(ptlims[0]) + ' < #it{p}_{T} < ' + '{0}'.format(ptlims[1]) + ' GeV/#it{c}')
+    paveText.AddText('{0}'.format(ptlims[0]) + ' #leq #it{p}_{T} < ' + '{0}'.format(ptlims[1]) + ' GeV/#it{c}')
     paveText.AddText('')
     paveText.AddText('#mu = ' + str(round(mu.getValV(), 5)) + ' #pm ' + str(round(mu.getError(), 5)))
     paveText.AddText('#sigma = ' + str(round(sigma.getValV(), 5)) + ' #pm ' + str(round(sigma.getError(), 5)))
@@ -436,7 +436,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   frame_residuals.addPlotable(residuals, "PE")  # Add residuals properly
   signal.plotOn(frame_residuals, RooFit.LineColor(utils.kRedC), RooFit.LineStyle(ROOT.kSolid), RooFit.Name("signal_fit"))
   frame_residuals.SetTitle("")
-  frame_residuals.GetXaxis().SetTitle('#it{M}_{p+#pi+d} (GeV/#it{c}^{2})')
+  frame_residuals.GetXaxis().SetTitle('#it{M}_{d+p+#pi^{-}} (GeV/#it{c}^{2})')
   frame_residuals.GetXaxis().SetTitleSize(0.1)
   frame_residuals.GetXaxis().SetLabelSize(0.1)
   frame_residuals.GetXaxis().SetTitleOffset(1.0)
