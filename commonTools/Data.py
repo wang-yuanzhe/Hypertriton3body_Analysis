@@ -7,10 +7,10 @@ import math
 from copy import deepcopy
 
 ############### Data Interval ###############
-class dataInterval:
+class DataInterval:
     'data frame in specific centrality and pt bin'
 
-    def __init__(self, df, pre_cut=None, cent_bin=[-999, 999], pt_bin=[-999, 999], MASS_BIN=[2.96, 3.04], dataType="", is_single_matter_type=False, model=None):
+    def __init__(self, df, pre_cut = None, cent_bin = [-999, 999], pt_bin = [-999, 999], MASS_BIN = [2.96, 3.04], dataType = "", is_single_matter_type = False, model = None):
         self.cent_bin = cent_bin
         self.pt_bin = pt_bin
         self.MASS_BIN = MASS_BIN
@@ -115,7 +115,7 @@ class dataInterval:
         return(signal_num, signal_error, exp_bkg_num, bkg_peak_value)
 
 ############### MC Data Interval ############### 
-class mcDataInterval(dataInterval):
+class mcDataInterval(DataInterval):
     'MC data frame in specific centrality and pt bin'
 
     def __init__(self, df, pre_cut = None, cent_bin = [-999, 999], pt_bin = [-999, 999], MASS_BIN = [2.96, 3.04], dataType = "", is_single_matter_type=False, model=None):
@@ -145,13 +145,13 @@ class mcDataInterval(dataInterval):
         return self.Efficiency, self.ExpCorrectedSignal
 
 ############### Data Group ###############
-class dataGroup:
+class DataGroup:
     'Object for local analysis'
 
-    def __init__(self, df, pre_cut=None, CENT_BIN_LIST=[[-999, 999]], PT_BIN_LIST=[[[-999, 999]]], SIGPDF_LIST=["dscb"], BKGPDF_LIST=["expo"], MASS_BIN=[2.96, 3.04], dataType="", is_single_matter_type=False, model_list=None):
-        self._build_data(df, pre_cut, CENT_BIN_LIST, PT_BIN_LIST, SIGPDF_LIST, BKGPDF_LIST, MASS_BIN, dataType, is_single_matter_type=is_single_matter_type, model_list=model_list)
+    def __init__(self, df, pre_cut = None, CENT_BIN_LIST = [[-999, 999]], PT_BIN_LIST = [[[-999, 999]]], MASS_BIN = [2.96, 3.04], SIGPDF_LIST = ["dscb"], BKGPDF_LIST = ["expo"], dataType = "", is_single_matter_type = False, model_list = None):
+        self._build_data(df, pre_cut, CENT_BIN_LIST, PT_BIN_LIST, MASS_BIN, SIGPDF_LIST, BKGPDF_LIST, dataType, is_single_matter_type=is_single_matter_type, model_list=model_list)
     
-    def _build_data(self, df, pre_cut=None, CENT_BIN_LIST=[[-999, 999]], PT_BIN_LIST=[[[-999, 999]]], SIGPDF_LIST=["dscb"], BKGPDF_LIST=["expo"], MASS_BIN=[2.96, 3.04], dataType="", is_single_matter_type=False, model_list=None, isMC=False):
+    def _build_data(self, df, pre_cut = None, CENT_BIN_LIST = [[-999, 999]], PT_BIN_LIST = [[[-999, 999]]], MASS_BIN = [2.96, 3.04], SIGPDF_LIST = ["dscb"], BKGPDF_LIST = ["expo"], dataType = "", is_single_matter_type = False, model_list = None, isMC = False):
         self.data = []
         self.CENT_BIN_LIST = CENT_BIN_LIST
         self.PT_BIN_LIST = PT_BIN_LIST
@@ -179,7 +179,7 @@ class dataGroup:
                 if isMC:
                     data = mcDataInterval(df, pre_cut, cent_bin, pt_bin, MASS_BIN, dataType, is_single_matter_type)
                 else:
-                    data = dataInterval(df, pre_cut, cent_bin, pt_bin, MASS_BIN, dataType, is_single_matter_type)
+                    data = DataInterval(df, pre_cut, cent_bin, pt_bin, MASS_BIN, dataType, is_single_matter_type)
                 if model_list is not None:
                     data.setModel(model_list[icent][ipt])
                 self.data[icent].append(deepcopy(data))
@@ -255,7 +255,7 @@ class dataGroup:
             for ipt, pt_bin in enumerate(self.PT_BIN_LIST[icent]):
                 self.data[icent][ipt].addModelPrediction(output_margin)
 
-    def invMFit(self, icent, ipt, sigpdf="Gauss", bkgpdf="exp", model_threshold=None,name=None, para=None, isMC=False, ifDrawStats=True, ifDebug=False,outfile=None):
+    def invMFit(self, icent, ipt, sigpdf = "Gauss", bkgpdf = "exp", model_threshold = None,name = None, para = None, isMC = False, ifDrawStats = True, ifDebug = False,outfile = None):
         ''' Fit the invariant mass distribution,'''
         return self.data[icent][ipt].invMFit(
             sigpdf=sigpdf,
@@ -270,7 +270,7 @@ class dataGroup:
         )
     
     def doSimultaneousFits(self, bkg_deuteron, bkg_uncorrelated, MODEL_Eff_LIST, score_eff_arrays_dict,
-                           mcpara_list=None, fit_massbin=[2.96, 3.02], outfile=None, fix_bkg_peak = True, ifDebug=False):
+                           mcpara_list = None, fit_massbin = [2.96, 3.02], outfile = None, fix_bkg_peak = True, ifDebug = False):
         signalCount = utils.createEmptyList( [len(self.CENT_BIN_LIST), len(self.PT_BIN_LIST[0]), len(self.SIGPDF_LIST), len(self.BKGPDF_LIST)] )
         expBkgCount = utils.createEmptyList( [len(self.CENT_BIN_LIST), len(self.PT_BIN_LIST[0]), len(self.SIGPDF_LIST), len(self.BKGPDF_LIST)] )
         signalError = utils.createEmptyList( [len(self.CENT_BIN_LIST), len(self.PT_BIN_LIST[0]), len(self.SIGPDF_LIST), len(self.BKGPDF_LIST)] )
@@ -307,11 +307,11 @@ class dataGroup:
         return signalCount, signalError, expBkgCount
     
 ############### MC Data Group ###############
-class mcDataGroup(dataGroup):
+class mcDataGroup(DataGroup):
     'MC data frame in specific centrality and pt bin'
 
-    def __init__(self, df, pre_cut = None, CENT_BIN_LIST = [[-999, 999]], PT_BIN_LIST = [[[-999, 999]]], SIGPDF_LIST=["dscb"], BKGPDF_LIST=["none"], MASS_BIN = [2.96, 3.04], dataType = "", is_single_matter_type = False, model_list = None):
-        self._build_data(df, pre_cut, CENT_BIN_LIST, PT_BIN_LIST, SIGPDF_LIST, BKGPDF_LIST, MASS_BIN, dataType, is_single_matter_type=is_single_matter_type, model_list=model_list, isMC=True)
+    def __init__(self, df, pre_cut = None, CENT_BIN_LIST = [[-999, 999]], PT_BIN_LIST = [[[-999, 999]]], MASS_BIN = [2.96, 3.04], SIGPDF_LIST = ["dscb"], BKGPDF_LIST = ["none"], dataType = "", is_single_matter_type = False, model_list = None):
+        self._build_data(df, pre_cut, CENT_BIN_LIST, PT_BIN_LIST, MASS_BIN, SIGPDF_LIST, BKGPDF_LIST, dataType, is_single_matter_type=is_single_matter_type, model_list=model_list, isMC=True)
 
     def calculateEfficiency(self, MCGenPD, pt_spectrum, eventNumber_in_realdata, BR, absorbfactor_list=None, is_single_matter_type=False):
         Efficiency = utils.createEmptyList( [len(self.CENT_BIN_LIST)] )
@@ -321,7 +321,7 @@ class mcDataGroup(dataGroup):
                 f_absorption = 1.0
                 if absorbfactor_list is not None:
                     f_absorption = absorbfactor_list[icent][ipt]
-                eff, expsig = data_interval.calculateEfficiency(MCGenPD, pt_spectrum, eventNumber_in_realdata, BR, f_absorption=f_absorption, is_single_matter_type=is_single_matter_type)
+                eff, expsig = data_interval.calculateEfficiency(MCGenPD, pt_spectrum, eventNumber_in_realdata, BR, f_absorption = f_absorption, is_single_matter_type = is_single_matter_type)
                 Efficiency[icent].append(eff)
                 ExpCorrectedSignal[icent].append(expsig)
         return Efficiency, ExpCorrectedSignal
