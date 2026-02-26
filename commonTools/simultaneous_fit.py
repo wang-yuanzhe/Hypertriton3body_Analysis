@@ -37,7 +37,7 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   xMirrored = ROOT.RooFormulaVar("xMirrored", "xMirrored", "3.08-x", ROOT.RooArgList(x))
 
   # Convert pandas data to RooFit dataset
-  data_se = utils.ndarray2roo(np.array(df_se['fM']), x, 'data_se')
+  data_se = utils.ndarray2roo(np.array(df_se[df_column]), x, 'data_se')
   data_mixingDeuteron = utils.ndarray2roo(np.array(df_mixingDeuteron[df_column]), x, 'data_mixingDeuteron')
   data_mixingProton = utils.ndarray2roo(np.array(df_mixingProton[df_column]), x, 'data_mixingProton')
 
@@ -222,7 +222,8 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   if cfg.isKFAnalysis:
     canvas_bkg = ROOT.TCanvas("canvas_bkg", "Background", 800, 1500)
   else:
-    canvas_bkg = ROOT.TCanvas("canvas_bkg" + title, "Background", 800, 1500)
+    canvas_bkg = ROOT.TCanvas("canvas_bkg", "Background", 800, 1500)
+    # canvas_bkg = ROOT.TCanvas("canvas_bkg" + title, "Background", 800, 1500)
   pad_uncorr_bkg = ROOT.TPad("pad_uncorr_bkg", "Uncorrelated bkg", 0, 0.5, 1, 1)
   pad_corr_bkg = ROOT.TPad("pad_corr_bkg", "Correlated bkg", 0, 0, 1, 0.5)
   pad_uncorr_bkg.SetBottomMargin(0.02)
@@ -249,7 +250,8 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   if cfg.isKFAnalysis:
     frame_bkg_uncorr.GetYaxis().SetRangeUser(0, 1.75 * frame_bkg_uncorr.GetMaximum())
   else:
-    frame_bkg_uncorr.GetYaxis().SetRangeUser(0, 2.3 * frame_bkg_uncorr.GetMaximum())
+    frame_bkg_uncorr.GetYaxis().SetRangeUser(0, 1.75 * frame_bkg_uncorr.GetMaximum())
+    # frame_bkg_uncorr.GetYaxis().SetRangeUser(0, 2.3 * frame_bkg_uncorr.GetMaximum())
 
   if cfg.isPerformancePlotting:
     paveText_uncorr = ROOT.TPaveText(0.15, 0.6, 0.56, 0.85, "NDC")
@@ -326,7 +328,8 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   if cfg.isKFAnalysis:
     canvas_signal = ROOT.TCanvas("canvas_signal", "Fit Results", 800, 1000)
   else:
-    canvas_signal = ROOT.TCanvas("canvas_signal" + title, "SE Fit Results", 800, 1000)
+    canvas_signal = ROOT.TCanvas("canvas_signal", "Fit Results", 800, 1000)
+    # canvas_signal = ROOT.TCanvas("canvas_signal" + title, "SE Fit Results", 800, 1000)
   pad1 = ROOT.TPad("pad1", "Fit", 0, 0.3, 1, 1)
   pad2 = ROOT.TPad("pad2", "Residual", 0, 0, 1, 0.3)
   pad1.SetBottomMargin(0.02)
@@ -384,7 +387,8 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   if cfg.isKFAnalysis:
     frame1.SetTitle('')
   else:
-    frame1.SetTitle(canvas_signal.GetTitle() + " " + title)  # Set title for upper plot
+    frame1.SetTitle('')
+    # frame1.SetTitle(canvas_signal.GetTitle() + " " + title)  # Set title for upper plot
   frame1.GetXaxis().SetTitle("")  # Remove x-axis title in upper plot
   frame1.GetXaxis().SetLabelOffset(999)
   frame1.GetXaxis().SetLabelSize(0)
@@ -396,16 +400,19 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
   frame1.Draw()
   # Info
   if cfg.isPerformancePlotting:
-    paveText = ROOT.TPaveText(0.15, 0.5, 0.52, 0.85, "NDC")
+    if cfg.isKFAnalysis:
+      paveText = ROOT.TPaveText(0.15, 0.5, 0.52, 0.85, "NDC")
+    else:
+      paveText = ROOT.TPaveText(0.15, 0.52, 0.42, 0.87, "NDC")
     paveText.SetName("paveText")
     paveText.SetBorderSize(0)
     paveText.SetFillStyle(0)
     paveText.SetTextFont(42)
     paveText.SetTextAlign(11)
-    paveText.SetTextSize(0.04)
+    paveText.SetTextSize(0.035)
     paveText.AddText('ALICE Performance')
     paveText.AddText('pp #sqrt{#it{s}} = 13.6 TeV')
-    paveText.AddText('#it{L}_{int.} = 21 pb^{-1}')
+    paveText.AddText('#it{L}_{int.} = 30 pb^{-1}') 
     paveText.AddText('')
     if cfg.isSTdata:
       paveText.AddText('{}_{#Lambda}^{3}H#rightarrow d+p+#pi^{-} + cc. tracked')
@@ -413,8 +420,11 @@ def simultaneousFit(df_se, df_mixingDeuteron, df_mixingProton, mcparas, nBins, p
       paveText.AddText('{}_{#Lambda}^{3}H#rightarrow d+p+#pi^{-} + cc.')
     paveText.AddText('{:.1f}'.format(ptlims[0]) + ' #leq #it{p}_{T} < ' + '{:.1f}'.format(ptlims[1]) + ' GeV/#it{c}')
 
-    leg = ROOT.TLegend(0.67, 0.57, 0.9, 0.86)
-    leg.SetTextSize(0.04)
+    if cfg.isKFAnalysis:
+      leg = ROOT.TLegend(0.67, 0.57, 0.9, 0.86)
+    else:
+      leg = ROOT.TLegend(0.6, 0.57, 0.87, 0.86)
+    leg.SetTextSize(0.035)
     leg.AddEntry("data", "Data", "pe")
     leg.AddEntry("total_fit", "Total fit", "l")
     leg.AddEntry("background", "Background", "l")

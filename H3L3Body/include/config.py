@@ -1,3 +1,3 @@
 isPerformancePlotting = True
 isKFAnalysis = False
-isSTdata = False
+isSTdata = True

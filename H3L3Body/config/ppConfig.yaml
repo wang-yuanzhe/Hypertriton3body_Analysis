@@ -1,0 +1,173 @@
+selection:
+  [
+    "fCt": "fCt >= 2 and fCt < 40",
+    "fCosPA": "fCosPA > 0.9999",
+    "fTPCNSigmaProton" : "abs(fTPCNSigmaProton) < 3",
+    "fTPCNSigmaPion": "abs(fTPCNSigmaPion) < 3",
+    "fTPCNSigmaBachelor": "abs(fTPCNSigmaBachelor) < 3",
+    "fDCADaughters": "fDCADaughters < 0.1",
+    "fM": "fM >= 2.96 and fM < 3.04",
+    "fDCAPionToPV": "fDCAPionToPV > 0.05",
+  ]
+
+MLPreSelection:
+  [
+    "fCt": "fCt >= 2 and fCt < 40",
+    "fCosPA": "fCosPA > 0.999",
+    "fTPCNSigmaProton" : "abs(fTPCNSigmaProton) < 5",
+    "fTPCNSigmaPion": "abs(fTPCNSigmaPion) < 5",
+    "fTPCNSigmaBachelor": "abs(fTPCNSigmaBachelor) < 5",
+    "fDCADaughters": "fDCADaughters < 0.05",
+    "fM": "fM >= 2.96 and fM < 3.04",
+    "fDCAPionToPV": "fDCAPionToPV > 0.05",
+  ]
+
+MLLoosePreSelection:
+  [
+    "fCt": "fCt >= 2 and fCt < 40",
+    "fCosPA": "fCosPA > 0.999",
+    "fTPCNSigmaProton" : "abs(fTPCNSigmaProton) < 5",
+    "fTPCNSigmaPion": "abs(fTPCNSigmaPion) < 5",
+    "fTPCNSigmaBachelor": "abs(fTPCNSigmaBachelor) < 5",
+    "fDCADaughters": "fDCADaughters < 0.1",
+    "fM": "fM >= 2.96 and fM < 3.04",
+    "fDCAPionToPV": "fDCAPionToPV > 0.05",
+  ]
+
+my_selections: [
+  {
+      "fCosPA": "fCosPA > 0.9998",
+      "fDCAVtxToDaughtersAv": "fDCAVtxToDaughtersAv < 0.06",
+      "fPtDe": "fPtDe > 0.6 and fPtDe < 10",
+      "fPtPr": "fPtPr > 0.3 and fPtPr < 5.0",
+      "fPtPi": "fPtPi > 0.1 and fPtPi < 1.2",
+      "fTPCNSigmaPr": "abs(fTPCNSigmaPr) < 3",
+      "fTPCNSigmaPi": "abs(fTPCNSigmaPi) < 5",
+      "fTPCNSigmaDe": "abs(fTPCNSigmaDe) < 3",
+      # trigger
+      "fMass": "fMass > 2.96 and fMass < 3.04",
+      "fCt": "fCt > 0 and fCt < 40",
+      "fRap": "abs(fRap) < 0.8",
+      "fTOFNSigmaDe": "(fPDe < 1 or abs(fTOFNSigmaDe) < 3)",
+      "fTPCNClTrackPr": "fTPCNClTrackPr > 90",
+      "fTPCNClTrackPi": "fTPCNClTrackPi > 70",
+      "fTPCNClTrackDe": "fTPCNClTrackDe > 100",
+      "fEtaPr": "abs(fEtaPr) < 0.9",
+      "fEtaPi": "abs(fEtaPi) < 0.9",
+      "fEtaDe": "abs(fEtaDe) < 0.9"
+  },
+  {
+      "fCosPA": "fCosPA > 0.9999",
+      "fDCAVtxToDaughtersAv": "fDCAVtxToDaughtersAv < 0.08",
+      "fCt": "fCt > 2 and fCt < 40",
+      "fPtDe": "fPtDe > 0.6 and fPtDe < 10",
+      "fPtPr": "fPtPr > 0.3 and fPtPr < 5.0",
+      "fPtPi": "fPtPi > 0.1 and fPtPi < 1.2",
+      "fTPCNSigmaPr": "abs(fTPCNSigmaPr) < 3",
+      "fTPCNSigmaPi": "abs(fTPCNSigmaPi) < 5",
+      "fTPCNSigmaDe": "abs(fTPCNSigmaDe) < 3",
+      # trigger
+      "fMass": "fMass > 2.96 and fMass < 3.04",
+      "fCt": "fCt > 0 and fCt < 40",
+      "fRap": "abs(fRap) < 0.8",
+      "fTOFNSigmaDe": "(fPDe < 1 or abs(fTOFNSigmaDe) < 5)",
+      "fTPCNClTrackPr": "fTPCNClTrackPr > 90",
+      "fTPCNClTrackPi": "fTPCNClTrackPi > 70",
+      "fTPCNClTrackDe": "fTPCNClTrackDe > 100",
+      "fEtaPr": "abs(fEtaPr) < 0.9",
+      "fEtaPi": "abs(fEtaPi) < 0.9",
+      "fEtaDe": "abs(fEtaDe) < 0.9"
+  }
+]
+
+carolina_selections: [
+  {
+      "fCosPA": "fCosPA > 0.99965",
+      "fDCAVtxToDaughtersAv": "fDCAVtxToDaughtersAv < 0.14",
+      "fPtDe": "fPtDe > 0.6 and fPtDe < 10",
+      "fPtPr": "fPtPr > 0.3 and fPtPr < 5.0",
+      "fPtPi": "fPtPi > 0.1 and fPtPi < 1.2",
+      "fTPCNSigmaPr": "abs(fTPCNSigmaPr) < 3",
+      "fTPCNSigmaPi": "abs(fTPCNSigmaPi) < 5",
+      "fTPCNSigmaDe": "abs(fTPCNSigmaDe) < 3",
+      # trigger
+      "fMass": "fMass > 2.96 and fMass < 3.04",
+      "fCt": "fCt > 0 and fCt < 40",
+      "fRap": "abs(fRap) < 0.8",
+      "fTOFNSigmaDe": "(fPDe < 1 or abs(fTOFNSigmaDe) < 5)",
+      "fTPCNClTrackPr": "fTPCNClTrackPr > 90",
+      "fTPCNClTrackPi": "fTPCNClTrackPi > 70",
+      "fTPCNClTrackDe": "fTPCNClTrackDe > 100",
+      "fEtaPr": "abs(fEtaPr) < 0.9",
+      "fEtaPi": "abs(fEtaPi) < 0.9",
+      "fEtaDe": "abs(fEtaDe) < 0.9"
+  },
+  {
+      "fCosPA": "fCosPA > 0.99975",
+      "fDCAVtxToDaughtersAv": "fDCAVtxToDaughtersAv < 0.14",
+      "fCt": "fCt > 2 and fCt < 40",
+      "fPtDe": "fPtDe > 0.6 and fPtDe < 10",
+      "fPtPr": "fPtPr > 0.3 and fPtPr < 5.0",
+      "fPtPi": "fPtPi > 0.1 and fPtPi < 1.2",
+      "fTPCNSigmaPr": "abs(fTPCNSigmaPr) < 3",
+      "fTPCNSigmaPi": "abs(fTPCNSigmaPi) < 5",
+      "fTPCNSigmaDe": "abs(fTPCNSigmaDe) < 3",
+      # trigger
+      "fMass": "fMass > 2.96 and fMass < 3.04",
+      "fCt": "fCt > 0 and fCt < 40",
+      "fRap": "abs(fRap) < 0.8",
+      "fTOFNSigmaDe": "(fPDe < 1 or abs(fTOFNSigmaDe) < 5)",
+      "fTPCNClTrackPr": "fTPCNClTrackPr > 90",
+      "fTPCNClTrackPi": "fTPCNClTrackPi > 70",
+      "fTPCNClTrackDe": "fTPCNClTrackDe > 100",
+      "fEtaPr": "abs(fEtaPr) < 0.9",
+      "fEtaPi": "abs(fEtaPi) < 0.9",
+      "fEtaDe": "abs(fEtaDe) < 0.9"
+  }
+]
+  
+carolina_selections_old: [
+    {
+        "fCosPA": "fCosPA > 0.9998",
+        "fDCAVtxToDaughtersAv": "fDCAVtxToDaughtersAv < 0.1",
+        "fPtDe": "fPtDe > 0.6 and fPtDe < 10",
+        "fPtPr": "fPtPr > 0.3 and fPtPr < 5.0",
+        "fPtPi": "fPtPi > 0.1 and fPtPi < 1.2",
+        "fTPCNSigmaPr": "abs(fTPCNSigmaPr) < 3",
+        "fTPCNSigmaPi": "abs(fTPCNSigmaPi) < 5",
+        "fTPCNSigmaDe": "abs(fTPCNSigmaDe) < 3",
+        # trigger
+        "fMass": "fMass > 2.96 and fMass < 3.04",
+        "fCt": "fCt > 0 and fCt < 40",
+        "fRap": "abs(fRap) < 0.8",
+        "fTOFNSigmaDe": "(fPDe < 1 or abs(fTOFNSigmaDe) < 5)",
+        "fTPCNClTrackPr": "fTPCNClTrackPr > 90",
+        "fTPCNClTrackPi": "fTPCNClTrackPi > 70",
+        "fTPCNClTrackDe": "fTPCNClTrackDe > 100",
+        "fEtaPr": "abs(fEtaPr) < 0.9",
+        "fEtaPi": "abs(fEtaPi) < 0.9",
+        "fEtaDe": "abs(fEtaDe) < 0.9"
+    },
+    {
+        "fCosPA": "fCosPA > 0.9998",
+        "fDCAVtxToDaughtersAv": "fDCAVtxToDaughtersAv < 0.1",
+        "fCt": "fCt > 2 and fCt < 40",
+        "fPtDe": "fPtDe > 0.6 and fPtDe < 3",
+        "fPtPr": "fPtPr > 0.3 and fPtPr < 5.0",
+        "fPtPi": "fPtPi > 0.1 and fPtPi < 1.2",
+        "fTPCNSigmaPr": "abs(fTPCNSigmaPr) < 3",
+        "fTPCNSigmaPi": "abs(fTPCNSigmaPi) < 5",
+        "fTPCNSigmaDe": "abs(fTPCNSigmaDe) < 3",
+        # trigger
+        "fMass": "fMass > 2.96 and fMass < 3.04",
+        "fCt": "fCt > 0 and fCt < 40",
+        "fRap": "abs(fRap) < 0.8",
+        "fTOFNSigmaDe": "(fPDe < 1 or abs(fTOFNSigmaDe) < 5)",
+        "fTPCNClTrackPr": "fTPCNClTrackPr > 90",
+        "fTPCNClTrackPi": "fTPCNClTrackPi > 70",
+        "fTPCNClTrackDe": "fTPCNClTrackDe > 100",
+        "fEtaPr": "abs(fEtaPr) < 0.9",
+        "fEtaPi": "abs(fEtaPi) < 0.9",
+        "fEtaDe": "abs(fEtaDe) < 0.9"
+    }
+]

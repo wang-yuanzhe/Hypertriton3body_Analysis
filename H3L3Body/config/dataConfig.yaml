@@ -1,0 +1,48 @@
+"25ac_ST":
+  "AO2D_path": "../data/LHC25pp/LHC25ac_pass1_skimmed_ST_AO2D.root"
+  "AnalysisResults_path": "../data/LHC25pp/LHC25ac_pass1_skimmed_ST_AO2D.root"
+  "mc_AO2D_path": "../data/before25QM/LHC24_skimmed/MCLHC25a3_AO2D.root"
+  "output_path": "pp25STPlot/"
+  "datatype": "pp skimmed ST"
+
+"24pp_ST":
+  "AO2D_path": ["../data/LHC24ppnew/LHC24am_pass1_skimmed_ST_AO2D.root", "../data/LHC24ppnew/LHC24an_pass1_skimmed_ST_AO2D.root", "../data/LHC24ppnew/LHC24ao_pass1_skimmed_ST_AO2D.root"]
+  "AnalysisResults_path": "../data/LHC24pp/LHC24pp_pass1_skimmed_ST_AO2D.root"
+  "mc_AO2D_path": "../data/before25QM/LHC24_skimmed/MCLHC25a3_AO2D.root"
+  "output_path": "pp24STPlot/"
+  "datatype": "pp skimmed ST"
+
+"pp_merge_ST":
+  "AO2D_path": ["../data/LHC24ppnew/LHC24am_pass1_skimmed_ST_AO2D.root", "../data/LHC24ppnew/LHC24an_pass1_skimmed_ST_AO2D.root", "../data/LHC24ppnew/LHC24ao_pass1_skimmed_ST_AO2D.root", "../data/LHC25pp/LHC25ac_pass1_skimmed_ST_AO2D.root"]
+  "AnalysisResults_path": ""
+  "mc_AO2D_path": "../data/before25QM/LHC24_skimmed/MCLHC25a3_AO2D.root"
+  "output_path": "ppMerge/"
+  "datatype": "pp skimmed"
+
+"pp":
+  "AO2D_path": ["../data/LHC24ppnew/LHC24am_pass1_skimmed_AO2D.root", "../data/LHC24ppnew/LHC24an_pass1_skimmed_AO2D.root", "../data/LHC24ppnew/LHC24ao_pass1_skimmed_AO2D.root", "../data/LHC25pp/LHC25ac_pass1_skimmed_AO2D.root", "../data/LHC25pp/LHC25ai_pass1_skimmed_AO2D.root", "../data/LHC25pp/LHC25am_pass1_skimmed_AO2D.root"]
+  "AnalysisResults_path": ["../data/LHC24ppnew/LHC24am_pass1_skimmed_AnalysisResults.root", "../data/LHC24ppnew/LHC24an_pass1_skimmed_AnalysisResults.root", "../data/LHC24ppnew/LHC24ao_pass1_skimmed_AnalysisResults.root"]
+  "mc_AO2D_path": ["../data/LHC25a3/train585469_AO2D.root", "../data/LHC25b9/LHC25b9_AO2D.root", "../data/LHC25i2/LHC25i2_AO2D.root"]
+  "output_path": "pp/"
+  "datatype": "pp skimmed"
+
+"pp_test":
+  "AO2D_path": ["../data/LHC24ppnew/LHC24am_pass1_skimmed_AO2D.root", "../data/LHC24ppnew/LHC24an_pass1_skimmed_AO2D.root", "../data/LHC24ppnew/LHC24ao_pass1_skimmed_AO2D.root"]
+  "AnalysisResults_path": ["../data/LHC24ppnew/LHC24am_pass1_skimmed_AnalysisResults.root", "../data/LHC24ppnew/LHC24an_pass1_skimmed_AnalysisResults.root", "../data/LHC24ppnew/LHC24ao_pass1_skimmed_AnalysisResults.root"]
+  "mc_AO2D_path": "../data/LHC25a3/train585469_AO2D.root"
+  "output_path": "ppTest/"
+  "datatype": "pp skimmed"
+
+"23pbpb_ST":
+  "AO2D_path": "../data/LHC23PbPb/LHC23PbPb_pass5_ST_AO2D.root"
+  "AnalysisResults_path": "../data/LHC23PbPb/LHC23PbPb_pass5_ST_AnalysisResults.root"
+  "mc_AO2D_path": "../data/before25QM/LHC24_skimmed/MCLHC25a3_AO2D.root"
+  "output_path": "pbpb23STPlot/"
+  "datatype": "pbpb skimmed ST"
+
+"ppmc":
+  "mc_AO2D_path": "../data/LHC25a3/train517521_AO2D.root"
+  # "mc_AO2D_path": "~/Downloads/AO2D.root"
+  # "mc_AO2D_path": "/Users/yuanzhe/alice/workflowTest/h3l3bodyQa/AO2D.root"
+  "output_path": "pp25a3/"
+  "datatype": "pp mc"

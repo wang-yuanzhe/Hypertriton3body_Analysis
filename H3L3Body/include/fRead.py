@@ -11,8 +11,54 @@ from hipe4ml.tree_handler import TreeHandler
 from hipe4ml.analysis_utils import train_test_generator
 import math
 from copy import deepcopy
-import utils
 import para
+
+from load_common import add_common_path
+add_common_path()
+from constants import hypertriton_mass, deuteron_mass, proton_mass, pion_charged_mass
+import utils
+
+# ****************************************
+def extend_df(df, isMC=False):
+    df.eval('fRad = sqrt((fX * fX) + (fY * fY))', inplace=True)
+    df.eval('fPt = sqrt((fPx * fPx) + (fPy * fPy))', inplace=True)
+    df.eval('fP = sqrt((fPx * fPx) + (fPy * fPy) + (fPz * fPz))', inplace=True)
+    df.eval(f'fE = sqrt((fPx * fPx) + (fPy * fPy) + (fPz * fPz) + ({hypertriton_mass} * {hypertriton_mass}))', inplace=True)
+    df.eval('fEta = arccosh(fP/fPt)', inplace=True)
+    df.eval('fRap = 0.5 * log((fE + fPz) / (fE - fPz))', inplace=True)
+    df.eval('fDecLen = sqrt(fX**2 + fY**2 + fZ**2)', inplace=True)
+    df.eval(f'fCt = fDecLen * {hypertriton_mass} / fP', inplace=True)
+    df.eval('fPtPr = sqrt((fPxTrackPr * fPxTrackPr) + (fPyTrackPr * fPyTrackPr))', inplace=True)
+    df.eval('fPtPi = sqrt((fPxTrackPi * fPxTrackPi) + (fPyTrackPi * fPyTrackPi))', inplace=True)
+    df.eval('fPtDe = sqrt((fPxTrackDe * fPxTrackDe) + (fPyTrackDe * fPyTrackDe))', inplace=True)
+    df.eval('fPPr = sqrt((fPxTrackPr * fPxTrackPr) + (fPyTrackPr * fPyTrackPr) + (fPzTrackPr * fPzTrackPr))', inplace=True)
+    df.eval('fPPi = sqrt((fPxTrackPi * fPxTrackPi) + (fPyTrackPi * fPyTrackPi) + (fPzTrackPi * fPzTrackPi))', inplace=True)
+    df.eval('fPDe = sqrt((fPxTrackDe * fPxTrackDe) + (fPyTrackDe * fPyTrackDe) + (fPzTrackDe * fPzTrackDe))', inplace=True)
+    df.eval('fEtaPr = arccosh(fPPr/fPtPr)', inplace=True)
+    df.eval('fEtaPi = arccosh(fPPi/fPtPi)', inplace=True)
+    df.eval('fEtaDe = arccosh(fPDe/fPtDe)', inplace=True)
+    df.eval(f'fM2PrPi = (sqrt(fPxTrackPr*fPxTrackPr + fPyTrackPr*fPyTrackPr + fPzTrackPr*fPzTrackPr + {proton_mass}*{proton_mass}) + sqrt(fPxTrackPi*fPxTrackPi + fPyTrackPi*fPyTrackPi + fPzTrackPi*fPzTrackPi + {pion_charged_mass}*{pion_charged_mass})) * (sqrt(fPxTrackPr*fPxTrackPr + fPyTrackPr*fPyTrackPr + fPzTrackPr*fPzTrackPr + {proton_mass}*{proton_mass}) + sqrt(fPxTrackPi*fPxTrackPi + fPyTrackPi*fPyTrackPi + fPzTrackPi*fPzTrackPi + {pion_charged_mass}*{pion_charged_mass})) - ((fPxTrackPr + fPxTrackPi) * (fPxTrackPr + fPxTrackPi) + (fPyTrackPr + fPyTrackPi) * (fPyTrackPr + fPyTrackPi) + (fPzTrackPr + fPzTrackPi) * (fPzTrackPr + fPzTrackPi))', inplace=True)
+    df.eval('fMPrPi = sqrt(fM2PrPi)', inplace=True)
+    df.eval(f'fM2PiDe = (sqrt(fPxTrackPi*fPxTrackPi + fPyTrackPi*fPyTrackPi + fPzTrackPi*fPzTrackPi + {pion_charged_mass}*{pion_charged_mass}) + sqrt(fPxTrackDe*fPxTrackDe + fPyTrackDe*fPyTrackDe + fPzTrackDe*fPzTrackDe + 1.875613*1.875613)) * (sqrt(fPxTrackPi*fPxTrackPi + fPyTrackPi*fPyTrackPi + fPzTrackPi*fPzTrackPi + {pion_charged_mass}*{pion_charged_mass}) + sqrt(fPxTrackDe*fPxTrackDe + fPyTrackDe*fPyTrackDe + fPzTrackDe*fPzTrackDe + 1.875613*1.875613)) - ((fPxTrackPi + fPxTrackDe) * (fPxTrackPi + fPxTrackDe) + (fPyTrackPi + fPyTrackDe) * (fPyTrackPi + fPyTrackDe) + (fPzTrackPi + fPzTrackDe) * (fPzTrackPi + fPzTrackDe))', inplace=True)
+    df.eval('fDCAXYsumDaughtersToPV = fDCAXYTrackPrToPV + fDCAXYTrackPiToPV + fDCAXYTrackDeToPV', inplace=True)
+    df.eval('fDCAvtxQuadSumAv = (fDCATrackPrToSV**2 + fDCATrackPiToSV**2 + fDCATrackDeToSV**2) / 3', inplace=True)
+    df.eval('fDCAvtxDaughtersSum = fDCATrackPrToSV + fDCATrackPiToSV + fDCATrackDeToSV', inplace=True)
+    # df.eval('fDCATrackPrToPV = sqrt(fDCAXYTrackPrToPV*fDCAXYTrackPrToPV + fDCAZTrackPrToPV*fDCAZTrackPrToPV)', inplace=True)
+    # df.eval('fDCATrackPiToPV = sqrt(fDCAXYTrackPiToPV*fDCAXYTrackPiToPV + fDCAZTrackPiToPV*fDCAZTrackPiToPV)', inplace=True)
+    # df.eval('fDCATrackDeToPV = sqrt(fDCAXYTrackDeToPV*fDCAXYTrackDeToPV + fDCAZTrackDeToPV*fDCAZTrackDeToPV)', inplace=True)
+    if isMC:
+        df.eval('fGenRad = sqrt((fGenX * fGenX) + (fGenY * fGenY))', inplace=True)
+        df.eval('fGenPt = sqrt((fGenPx * fGenPx) + (fGenPy * fGenPy))', inplace=True)
+        df.eval('fResoPt = fPt - fGenPt', inplace=True)
+        # df.eval('pullPt = (pT - genPt)/fPtErr', inplace=True)
+        df.eval('fResoX = fX - fGenX', inplace=True)
+        df.eval('fResoY = fY - fGenY', inplace=True)
+        df.eval('fResoZ = fZ - fGenZ', inplace=True)
+        # df.eval('fPullX = (fX - fGenX)/fVtxCovMat[0]', inplace=True)
+        # df.eval('fPullY = (fY - fGenY)/fVtxCovMat[2]', inplace=True)
+        # df.eval('fPullZ = (fZ - fGenZ)/fVtxCovMat[5]', inplace=True)
+    
+    df.drop(["fPxTrackPr", "fPyTrackPr", "fPzTrackPr", "fPxTrackPi", "fPyTrackPi", "fPzTrackPi", "fPxTrackDe", "fPyTrackDe", "fPzTrackDe"], axis=1, inplace=True)
 
 # ****************************************
 def getConfigPath(dataType):
@@ -20,45 +66,6 @@ def getConfigPath(dataType):
         path = '../config/PbPbConfig.yaml'
     else:    
         path = '../config/ppConfig.yaml'
-    return path
-
-# ****************************************
-def getDataAnaResultsPath(dataType):
-    if dataType == "23Thin":
-        path = '../data/LHC23_Thin/LHC23_pass4_Thin_AnalysisResults.root'
-    elif dataType == "23PbPb":
-        path = '../data/LHC23_PbPb/LHC23PbPb_pass4_AnalysisResults.root'
-    elif dataType == "24skimmed":
-        path = '../data/LHC24_skimmed/Ana_all.root'
-    # elif dataType == "24skimmed_reduced":
-    else:
-        raise ValueError("Wrong dataType")
-
-    return path
-
-# ****************************************
-def getDataAO2DPath(dataType, period=None):
-    if dataType == "23Thin":
-        path = '../data/LHC23_Thin/LHC23_pass4_Thin_AO2D.root'
-    elif dataType == "23PbPb":
-        path = '../data/LHC23_PbPb/LHC23PbPb_pass4_AO2D.root'
-    elif dataType == "24skimmed":
-        path = ['../data/LHC24_skimmed/LHC24am_pass1_skimmed_AO2D.root', '../data/LHC24_skimmed/LHC24an_pass1_skimmed_AO2D.root', '../data/LHC24_skimmed/LHC24ao_pass1_skimmed_AO2D.root']
-    elif dataType ==  "24skimmed_reduced":
-        path = ['../data/backup_newReduced/LHC24amanao_pass1_skimmed_reduced_AO2D.root']
-    elif dataType == "24skimmed_newReduced":
-        path = '../data/newReduced/LHC24amanao_newRedcued_AO2D.root'
-    elif dataType == "24newSkimmed":
-        path = []
-        if "am" in period:
-            path.append('../data/newSkimmed/LHC24am_pass1_skimmed_AO2D.root')
-        if "an" in period:
-            path.append('../data/newSkimmed/LHC24an_pass1_skimmed_AO2D.root')
-        if "ao" in period:
-            path.append('../data/newSkimmed/LHC24ao_pass1_skimmed_AO2D.root')
-    else:
-        raise ValueError("Wrong dataType")
-
     return path
 
 # ****************************************
@@ -100,62 +107,50 @@ def getBkgAO2DPath(dataType, method, period=None):
     return path
 
 # ****************************************
-def getDataTH(dataType, period=None):
-    DataTH = TreeHandler(getDataAO2DPath(dataType, period=period),'O2hyp3bodycands', folder_name='DF*')
-    return DataTH
-
-# ****************************************
-def getMCTH(dataType, period=None):
-    MCTH = TreeHandler(getMCAO2DPath(dataType, period),'O2mchyp3bodycands', folder_name='DF*')
-    return MCTH
-
-# ****************************************
-def getBkgTH(dataType, method, DataTH = None, period = None):
+def getBkgPD(dataType, method, DataPD = None, col_mass="fMass"):
     if method == "mixed_deuteron":
-        # BkgTH = TreeHandler("../data/newReduced/LHC24amao_pass1_skimmed_reduced_EM5000000_AO2D.root",'O2hyp3bodycands', folder_name='DF*')
-        # BkgTH = TreeHandler("../data/newReduced/LHC24amao_newReducedTest_OnlyCutOnH3LDCA_EM5000000_AO2D.root",'O2hyp3bodycands', folder_name='DF*')
-        # BkgTH = TreeHandler("../data/newReduced/LHC24amao_newReducedTest_noV0CosPAXYCut_EM2000_AO2D.root",'O2hyp3bodycands', folder_name='DF*')
-        # BkgTH = TreeHandler("../data/newReduced/LHC24amao_newReduced_NoV0Cut_EM5000000_AO2D.root",'O2hyp3bodycands', folder_name='DF*')
-        # BkgTH = TreeHandler(["../data/newReduced/LHC24amao_newReduced_mixingDeuteron_AO2D.root", "../data/newReduced/LHC24an_newReduced_mixingDeuteron_AO2D.root"],'O2hyp3bodycands', folder_name='DF*')
-        BkgTH = TreeHandler(["../data/EMReduced/LHC24amao_newReduced_mixingDeuteron_AO2D.root", "../data/EMReduced/LHC24an_newReduced_mixingDeuteron_AO2D.root"],'O2hyp3bodycands', folder_name='DF*')
+        # BkgPD = utils.getDF_fromFile("../data/newReduced/LHC24amao_pass1_skimmed_reduced_EM5000000_AO2D.root", 'O2hyp3bodycands', folder_name='DF*')
+        # BkgPD = utils.getDF_fromFile("../data/newReduced/LHC24amao_newReducedTest_OnlyCutOnH3LDCA_EM5000000_AO2D.root", 'O2hyp3bodycands', folder_name='DF*')
+        # BkgPD = utils.getDF_fromFile("../data/newReduced/LHC24amao_newReducedTest_noV0CosPAXYCut_EM2000_AO2D.root", 'O2hyp3bodycands', folder_name='DF*')
+        # BkgPD = utils.getDF_fromFile("../data/newReduced/LHC24amao_newReduced_NoV0Cut_EM5000000_AO2D.root", 'O2hyp3bodycands', folder_name='DF*')
+        # BkgPD = utils.getDF_fromFile(["../data/newReduced/LHC24amao_newReduced_mixingDeuteron_AO2D.root", "../data/newReduced/LHC24an_newReduced_mixingDeuteron_AO2D.root"], 'O2hyp3bodycands', folder_name='DF*')
+        BkgPD = utils.getDF_fromFile(["../data/before25QM/EMReduced/LHC24amao_newReduced_mixingDeuteron_AO2D.root", "../data/before25QM/EMReduced/LHC24an_newReduced_mixingDeuteron_AO2D.root"], 'O2hyp3bodycands', folder_name='DF*')
     elif method == "mixed_deuteron_newBin":
-        BkgTH = TreeHandler(["../data/EMNewBin/LHC24amao_newReduced_mixingDeuteron_AO2D.root", "../data/EMNewBin/LHC24an_newReduced_mixingDeuteron_AO2D.root"],'O2hyp3bodycands', folder_name='DF*')
+        BkgPD = utils.getDF_fromFile(["../data/before25QM/EMNewBin/LHC24amao_newReduced_mixingDeuteron_AO2D.root", "../data/before25QM/EMNewBin/LHC24an_newReduced_mixingDeuteron_AO2D.root"], 'O2hyp3bodycands', folder_name='DF*')
     elif method == "mixed_uncorrelated":
-        # BkgTH = TreeHandler(["../data/newReduced/LHC24amao_newReduced_mixingProton_AO2D.root", "../data/newReduced/LHC24an_newReduced_mixingProton_AO2D.root"],'O2hyp3bodycands', folder_name='DF*')
-        BkgTH = TreeHandler(["../data/EMReduced/LHC24amao_newReduced_mixingProton_AO2D.root", "../data/EMReduced/LHC24an_newReduced_mixingProton_AO2D.root",
-                             "../data/EMReduced/LHC24amao_newReduced_mixingPion_AO2D.root", "../data/EMReduced/LHC24an_newReduced_mixingPion_AO2D.root"],'O2hyp3bodycands', folder_name='DF*')
+        # BkgPD = utils.getDF_fromFile(["../data/newReduced/LHC24amao_newReduced_mixingProton_AO2D.root", "../data/newReduced/LHC24an_newReduced_mixingProton_AO2D.root"], 'O2hyp3bodycands', folder_name='DF*')
+        BkgPD = utils.getDF_fromFile(["../data/before25QM/EMReduced/LHC24amao_newReduced_mixingProton_AO2D.root", "../data/before25QM/EMReduced/LHC24an_newReduced_mixingProton_AO2D.root",
+                             "../data/before25QM/EMReduced/LHC24amao_newReduced_mixingPion_AO2D.root", "../data/before25QM/EMReduced/LHC24an_newReduced_mixingPion_AO2D.root"], 'O2hyp3bodycands', folder_name='DF*')
     elif method == "Sideband":
-        if DataTH == None:
+        if DataPD == None:
             raise ValueError("Input dataTH for background tree")
         else:
-            BkgTH = DataTH.get_subset('fM < 2.98 or fM > 3.005')
-    elif method == "EM" or method == "LikeSign":                
-        BkgTH = TreeHandler(getBkgAO2DPath(dataType, method, period),'O2hyp3bodycands', folder_name='DF*')
+            BkgPD = DataPD.query(f'{col_mass} < 2.98 or {col_mass} > 3.005')
     else:
         raise ValueError("Wrong Method to get background")
 
-    return BkgTH
+    return BkgPD
 
 # ****************************************
-def getEventNumber(dataType, period = None):
-    if "skimmed" in dataType.lower():
-        # anaQA = ROOT.TFile(getDataAnaResultsPath(dataType), "READ")
+def getEventNumber(dataType, AnaFilePath, period = None):
+    if "skimmed" in dataType.lower(): # Only work in O2Physics Environment
+        # anaQA = ROOT.TFile(AnaFilePath, "READ")
         # dir = anaQA.Get("threebody-reco-task")
         # zorroSum = dir.Get("zorroSummary;1")
         # return zorroSum.getNormalisationFactor(0)
-        if dataType == "24skimmed":
-            return 1.2403e+12
-        elif dataType == "24newSkimmed":
-            return 1.1528149e+12
-        elif dataType == "24skimmed_newReduced":
-            return 1.1804801e+12
-        elif dataType == "24skimmed_reduced":
-            return 1.2977420e+12
+        # if dataType == "24skimmed":
+        #     return 1.2403e+12
+        # elif dataType == "24newSkimmed":
+        #     return 1.1528149e+12
+        # elif dataType == "24skimmed_newReduced":
+        #     return 1.1804801e+12
+        # elif dataType == "24skimmed_reduced":
+        #     return 1.2977420e+12
         raise ValueError("Wrong dataType")
     else:
-        anaQA = ROOT.TFile(getDataAnaResultsPath(dataType), "READ")
-        hEventCounter = anaQA.Get("threebody-reco-task/hEventCounter")
-        return hEventCounter.GetBinContent(3)
+        anaQA = ROOT.TFile(AnaFilePath, "READ")
+        hEventCounter = anaQA.Get("decay3body-builder/Counters/hEventCounter")
+        return hEventCounter.GetBinContent(2)
 
 # ****************************************
 def getHypertritonPtShape(dataType):
@@ -246,3 +241,92 @@ def getH3L2bodyYieldHist(PT_BIN_LIST, icent=0):
         h2bodySyst.SetBinContent(ipt+1, rawyield_2body[ipt])
         h2bodySyst.SetBinError(ipt+1, systunc_2body[ipt])
     return (h2bodyStat, h2bodySyst)
+
+# ****************************************
+def calVirtualLambdaInvM(proton_pt, proton_eta, proton_phi, pion_pt, pion_eta, pion_phi):
+    proton_px = proton_pt * np.cos(proton_phi)
+    proton_py = proton_pt * np.sin(proton_phi)
+    proton_pz = proton_pt * np.sinh(proton_eta)
+
+    pion_px = pion_pt * np.cos(pion_phi)
+    pion_py = pion_pt * np.sin(pion_phi)
+    pion_pz = pion_pt * np.sinh(pion_eta)
+
+    proton_e = np.sqrt(proton_px**2 + proton_py**2 + proton_pz**2 + proton_mass**2)
+    pion_e = np.sqrt(pion_px**2 + pion_py**2 + pion_pz**2 + pion_charged_mass**2)
+
+    lambda_e = proton_e + pion_e
+    lambda_px = proton_px + pion_px
+    lambda_py = proton_py + pion_py
+    lambda_pz = proton_pz + pion_pz
+
+    lambda_m = np.sqrt(lambda_e**2 - lambda_px**2 - lambda_py**2 - lambda_pz**2)
+
+    return lambda_m
+# ****************************************
+def calMdp(proton_pt, proton_eta, proton_phi, deuteron_pt, deuteron_eta, deuteron_phi):
+    proton_px = proton_pt * np.cos(proton_phi)
+    proton_py = proton_pt * np.sin(proton_phi)
+    proton_pz = proton_pt * np.sinh(proton_eta)
+
+    deuteron_px = deuteron_pt * np.cos(deuteron_phi)
+    deuteron_py = deuteron_pt * np.sin(deuteron_phi)
+    deuteron_pz = deuteron_pt * np.sinh(deuteron_eta)
+
+    proton_e = np.sqrt(proton_px**2 + proton_py**2 + proton_pz**2 + proton_mass**2)
+    deuteron_e = np.sqrt(deuteron_px**2 + deuteron_py**2 + deuteron_pz**2 + deuteron_mass**2)
+
+    total_e = proton_e + deuteron_e
+    total_px = proton_px + deuteron_px
+    total_py = proton_py + deuteron_py
+    total_pz = proton_pz + deuteron_pz
+
+    invariant_mass = np.sqrt(total_e**2 - total_px**2 - total_py**2 - total_pz**2)
+    return invariant_mass
+
+# ****************************************
+def calNewElements(df, isNewDataModel = True, isMC = False):
+    # df['fDiffRDaughter'] = df['fRadiusBachelor'] - df[['fRadiusProton', 'fRadiusPion']].min(axis=1)
+    # df['fDiffRProton'] = df['fRadiusProton'] - df['fVtxRadius']
+    # df['fDiffRPion'] = df['fRadiusPion'] - df['fVtxRadius']
+    # df['fDiffRBachelor'] = df['fRadiusBachelor'] - df['fVtxRadius']
+    ######### temporary fix #########
+    if isNewDataModel:
+        df['fPtProton'] = np.sqrt(df['fPxTrackPr']**2 + df['fPyTrackPr']**2)
+        df['fEtaProton'] = np.arcsinh(df['fPzTrackPr'] / df['fPtProton'])
+        df['fPhiProton'] = np.arctan2(df['fPyTrackPr'], df['fPxTrackPr'])
+        df['fPtPion'] = np.sqrt(df['fPxTrackPi']**2 + df['fPyTrackPi']**2)
+        df['fEtaPion'] = np.arcsinh(df['fPzTrackPi'] / df['fPtPion'])
+        df['fPhiPion'] = np.arctan2(df['fPyTrackPi'], df['fPxTrackPi'])
+        df['fPtBachelor'] = np.sqrt(df['fPxTrackDe']**2 + df['fPyTrackDe']**2)
+        df['fEtaBachelor'] = np.arcsinh(df['fPzTrackDe'] / df['fPtBachelor'])
+        df['fPhiBachelor'] = np.arctan2(df['fPyTrackDe'], df['fPxTrackDe'])
+
+        df['fCentrality'] = 1
+        df['fPt'] = np.sqrt(df['fPx']**2 + df['fPy']**2)
+        df['fTPCNSigmaProton'] = df['fTPCNSigmaPr']
+        df['fTPCNSigmaPion'] = df['fTPCNSigmaPi']
+        df['fTPCNSigmaBachelor'] = df['fTPCNSigmaDe']
+        df['fTOFNSigmaBachelor'] = df['fTOFNSigmaDe']
+        df['fDCADaughters'] = df['fDCAVtxToDaughtersAv']
+        df['fM'] = df['fMass']
+        if 'fDCAZTrackPiToPV' in df.columns:
+            df['fDCAPionToPV'] = np.sqrt(df['fDCAXYTrackPiToPV']**2 + df['fDCAZTrackPiToPV']**2)
+        else:
+            df['fDCAPionToPV'] = df['fDCATrackPiToPV']
+        if isMC:
+            df['fGenPt'] = np.sqrt(df['fGenPx']**2 + df['fGenPy']**2)
+            df['fSurvivedEventSelection'] = df['fIsSurvEvSel']
+            df['fIsSignal'] = df['fIsTrueH3L'] | df['fIsTrueAntiH3L']
+            df['fGenRapidity'] = df['fGenRap']
+    #################################
+    df['fMVirtualLambda'] = calVirtualLambdaInvM(df['fPtProton'], df['fEtaProton'], df['fPhiProton'], df['fPtPion'], df['fEtaPion'], df['fPhiPion'])
+    df['fMdp'] = calMdp(df['fPtProton'], df['fEtaProton'], df['fPhiProton'], df['fPtBachelor'], df['fEtaBachelor'], df['fPhiBachelor'])
+
+# ****************************************
+def fix_oldDataFrame(df):
+    df.eval('fMass = fM', inplace=True)
+    df.eval('fPDe = fPtBachelor * cosh(fEtaBachelor)', inplace=True)
+    df.eval(f'fE = sqrt(fP * fP + {hypertriton_mass} * {hypertriton_mass})', inplace=True)
+    df.eval('fPz = fPtProton*sinh(fEtaProton) + fPtPion*sinh(fEtaPion) + fPtBachelor*sinh(fEtaBachelor)', inplace=True)
+    df.eval('fRapidity = 0.5 * log((fE + fPz) / (fE - fPz))', inplace=True)
